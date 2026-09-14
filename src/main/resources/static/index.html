@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hosman</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="login-view" class="login-page">
+      <div class="login-box">
+        <div class="hospital-mark">+</div>
+        <h1>Hosman — Hospital Management System</h1>
+        <p>Login to continue</p>
+
+        <form onsubmit="handleLogin(event)">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Enter username" />
+
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter password" />
+
+          <div class="login-buttons">
+            <button type="submit">LOGIN</button>
+            <button type="button" onclick="clearLogin()">CLEAR</button>
+          </div>
+
+          <p id="login-error" class="error"></p>
+          <small>Demo login: admin / 1234</small>
+        </form>
+      </div>
+    </div>
+
+    <div id="app-view" class="hidden">
+      <header>
+        <div class="header-title">CITYCARE HOSPITAL</div>
+        <div class="header-right">
+          <span id="time"></span>
+          <button class="logout-top" onclick="handleLogout()">Logout</button>
+        </div>
+      </header>
+
+      <nav class="menu">
+        <button onclick="switchTab('add-patient')">Add New Patient</button>
+        <button onclick="switchTab('employees')">All Employee Info</button>
+        <button onclick="switchTab('search-room')">Search Room</button>
+        <button onclick="switchTab('patient-info')">Patient Info</button>
+
+        <button onclick="switchTab('update-patient')">
+          Update Patient Details
+        </button>
+        <button onclick="switchTab('discharge')">Patient Discharge</button>
+        <button onclick="switchTab('room')">Room</button>
+        <button onclick="switchTab('department')">Department</button>
+
+        <button onclick="switchTab('ambulance')">Hospital Ambulance</button>
+        <button onclick="switchTab('dashboard')">Dashboard</button>
+      </nav>
+
+      <main>
+        <div id="view-container" class="main-box"></div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
