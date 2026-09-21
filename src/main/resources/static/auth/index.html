@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authenticate - Hosman</title>
+    <link rel="stylesheet" type="text/css" href="auth/style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Login Section -->
+      <section id="login-section-id">
+        <h2>Login to Hosman</h2>
+
+        <form id="login-form-id" onsubmit="loginUser(event)">
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              required
+            />
+          </div>
+
+          <button type="submit">Login</button>
+
+          <div class="form-error">
+            <p id="login-form-error-id"></p>
+          </div>
+        </form>
+
+        <div class="switch">
+          Don't have an account?
+          <a onclick="showRegister()">Register</a>
+        </div>
+      </section>
+
+      <!-- Register Section -->
+      <section id="register-section-id">
+        <h2>Register to Hosman</h2>
+
+        <form id="register-form-id" onsubmit="registerUser(event)">
+          <!-- Patient Name -->
+          <div class="form-group">
+            <label>Patient Name</label>
+
+            <div class="name-row">
+              <input
+                type="text"
+                name="firstName"
+                placeholder="First name"
+                required
+              />
+
+              <input type="text" name="middleName" placeholder="Middle name" />
+
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Last name"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Blood Group -->
+          <div class="form-group">
+            <label for="register-blood-group">Blood Group</label>
+            <select name="bloodGroup" required>
+              <option value="" disabled selected>Select blood group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="form-group">
+            <label for="register-dob">Date of Birth</label>
+            <input type="date" name="dateOfBirth" required />
+          </div>
+
+          <!-- Gender -->
+          <div class="form-group">
+            <label for="register-gender">Gender</label>
+            <select name="gender" required>
+              <option value="" disabled selected>Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label for="register-phone">Phone Number</label>
+            <input
+              type="tel"
+              name="phoneNumber"
+              placeholder="Enter phone number"
+              required
+            />
+          </div>
+
+          <!-- Username -->
+          <div class="form-group">
+            <label for="register-username">Username</label>
+            <input
+              type="text"
+              name="username"
+              placeholder="Choose a username"
+              required
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              required
+            />
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label for="register-confirm-password">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              required
+            />
+          </div>
+
+          <button type="submit">Register</button>
+
+          <div class="form-error">
+            <p id="register-form-error-id"></p>
+          </div>
+        </form>
+
+        <div class="switch">
+          Already have an account?
+          <a onclick="showLogin()">Login</a>
+        </div>
+      </section>
+    </div>
+
+    <script type="text/javascript" src="auth/script.js"></script>
+  </body>
+</html>

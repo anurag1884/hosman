@@ -1,28 +1,28 @@
-package hosman.user;
+package hosman.admin;
 
 import org.springframework.boot.CommandLineRunner;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import hosman.controller.LoginController;
+import hosman.repo.AccountRepository;
+import hosman.service.AccountService;
 
 @Configuration
 public class AdminInitializer {
 
     @Bean
-    CommandLineRunner createAdmin(
-            UserRepository repo,
-            LoginController controller) {
+    CommandLineRunner createAdmin(AccountRepository repo, AccountService service) {
 
         return args -> {
 
-            if (repo.findByUsername("alice").isEmpty()) {
-                controller.createUser("alice", "password123", "USER");
-
+            if (repo.findByUsername("admin").isEmpty()) {
+                service.saveAccount("admin", "1234", "ADMIN");
                 System.out.println("Admin account created");
             }
+
         };
+
     }
 
 }

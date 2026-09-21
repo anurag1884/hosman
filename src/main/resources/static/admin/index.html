@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Hosman - Admin Dashboard</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="admin/style.css" />
+  </head>
+
+  <body>
+    <!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+
+        <div class="logo-text">
+          <h3>CarePoint</h3>
+          <span>Hospital Reception</span>
+        </div>
+      </div>
+
+      <div class="menu">
+        <div class="menu-title">Main</div>
+
+        <button class="nav-link active" data-page="dashboard">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-link" data-page="patients">
+          <i class="bi bi-people"></i>
+          <span>Patients</span>
+        </button>
+
+        <button class="nav-link" data-page="appointments">
+          <i class="bi bi-calendar-check"></i>
+          <span>Appointments</span>
+        </button>
+
+        <button class="nav-link" data-page="doctors">
+          <i class="bi bi-person-badge"></i>
+          <span>Doctors</span>
+        </button>
+
+        <button class="nav-link" data-page="queue">
+          <i class="bi bi-clock"></i>
+          <span>OPD Queue</span>
+        </button>
+
+        <div class="menu-title">Management</div>
+
+        <button class="nav-link" data-page="billing">
+          <i class="bi bi-receipt"></i>
+          <span>Billing</span>
+        </button>
+
+        <button class="nav-link" data-page="reports">
+          <i class="bi bi-bar-chart"></i>
+          <span>Reports</span>
+        </button>
+
+        <button class="nav-link" data-page="settings">
+          <i class="bi bi-gear"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+
+      <div class="logout">
+        <button class="nav-link" id="logoutBtn">
+          <i class="bi bi-box-arrow-right"></i>
+
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- =====================================================
+     MAIN
+===================================================== -->
+
+    <main class="main">
+      <!-- HEADER -->
+
+      <header class="header">
+        <div class="d-flex align-items-center gap-3">
+          <button class="mobile-menu" id="mobileMenu">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <div class="header-title">
+            <h2 id="headerTitle">Dashboard</h2>
+
+            <span> CarePoint Hospital </span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="search">
+            <i class="bi bi-search"></i>
+
+            <input
+              type="text"
+              id="globalSearch"
+              placeholder="Search patient..."
+            />
+          </div>
+
+          <button class="notification" onclick="showNotifications()">
+            <i class="bi bi-bell"></i>
+
+            <span class="notification-count"></span>
+          </button>
+
+          <div class="user">
+            <div class="avatar">RS</div>
+
+            <div class="user-info">
+              <strong> Reception Staff </strong>
+
+              <span> Front Desk </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- =====================================================
+     CONTENT
+===================================================== -->
+
+      <div class="content">
+        <!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+        <section class="page active" id="dashboard">
+          <div class="page-heading">
+            <div>
+              <h1>Good Morning 👋</h1>
+
+              <p>Here is today's hospital reception overview.</p>
+            </div>
+
+            <div>
+              <span style="font-size: 10px; color: #8a94a6">
+                <i class="bi bi-calendar"></i>
+                18 September 2026
+              </span>
+            </div>
+          </div>
+
+          <!-- STATISTICS -->
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon">
+                  <i class="bi bi-calendar-check"></i>
+                </div>
+              </div>
+
+              <h2 id="dashboardAppointments">48</h2>
+
+              <p>Today's Appointments</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+              </div>
+
+              <h2 id="dashboardPatients">17</h2>
+
+              <p>New Patients Today</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon">
+                  <i class="bi bi-clock"></i>
+                </div>
+              </div>
+
+              <h2 id="dashboardQueue">12</h2>
+
+              <p>Patients Waiting</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-top">
+                <div class="stat-icon">
+                  <i class="bi bi-person-check"></i>
+                </div>
+              </div>
+
+              <h2>14</h2>
+
+              <p>Doctors Available</p>
+            </div>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Quick Actions</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="quick-actions">
+                <button
+                  class="quick-btn"
+                  onclick="
+                    openPage('patients');
+                    openModal('patientModal');
+                  "
+                >
+                  <i class="bi bi-person-plus"></i>
+
+                  Register Patient
+                </button>
+
+                <button
+                  class="quick-btn"
+                  onclick="
+                    openPage('appointments');
+                    openModal('appointmentModal');
+                  "
+                >
+                  <i class="bi bi-calendar-plus"></i>
+
+                  Book Appointment
+                </button>
+
+                <button class="quick-btn" onclick="openPage('patients')">
+                  <i class="bi bi-search"></i>
+
+                  Find Patient
+                </button>
+
+                <button
+                  class="quick-btn"
+                  onclick="
+                    openPage('billing');
+                    openModal('billModal');
+                  "
+                >
+                  <i class="bi bi-receipt"></i>
+
+                  Create Bill
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DASHBOARD GRID -->
+
+          <div class="dashboard-grid">
+            <!-- APPOINTMENTS -->
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Today's Appointments</h3>
+
+                <button
+                  class="btn btn-secondary btn-small"
+                  onclick="openPage('appointments')"
+                >
+                  View All
+                </button>
+              </div>
+
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Patient</th>
+                      <th>Doctor</th>
+                      <th>Department</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="dashboardAppointmentTable"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- DOCTORS -->
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Doctor Availability</h3>
+
+                <button
+                  class="btn btn-secondary btn-small"
+                  onclick="openPage('doctors')"
+                >
+                  View All
+                </button>
+              </div>
+
+              <div class="card-body" id="dashboardDoctors"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     PATIENTS
+===================================================== -->
+
+        <section class="page" id="patients">
+          <div class="page-heading">
+            <div>
+              <h1>Patients</h1>
+
+              <p>Search and manage registered patients.</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openModal('patientModal')">
+              <i class="bi bi-person-plus"></i>
+              Register Patient
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <input
+              class="form-control"
+              id="patientSearch"
+              placeholder="Search name, ID or phone..."
+              oninput="renderPatients()"
+            />
+
+            <select
+              class="form-select"
+              id="genderFilter"
+              onchange="renderPatients()"
+            >
+              <option value="">All Gender</option>
+
+              <option>Male</option>
+
+              <option>Female</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>Last Visit</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="patientsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     APPOINTMENTS
+===================================================== -->
+
+        <section class="page" id="appointments">
+          <div class="page-heading">
+            <div>
+              <h1>Appointments</h1>
+
+              <p>Manage today's and upcoming appointments.</p>
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="openModal('appointmentModal')"
+            >
+              <i class="bi bi-calendar-plus"></i>
+              Book Appointment
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <input type="date" class="form-control" id="appointmentDate" />
+
+            <select class="form-select">
+              <option>All Departments</option>
+              <option>Cardiology</option>
+              <option>General Medicine</option>
+              <option>Orthopedics</option>
+              <option>Dermatology</option>
+            </select>
+
+            <select class="form-select">
+              <option>All Status</option>
+              <option>Confirmed</option>
+              <option>Waiting</option>
+              <option>Completed</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Appointment ID</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="appointmentsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     DOCTORS
+===================================================== -->
+
+        <section class="page" id="doctors">
+          <div class="page-heading">
+            <div>
+              <h1>Doctors</h1>
+
+              <p>Check doctor availability and schedules.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Room</th>
+                    <th>Working Hours</th>
+                    <th>Status</th>
+                    <th>Next Slot</th>
+                  </tr>
+                </thead>
+
+                <tbody id="doctorsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     OPD QUEUE
+===================================================== -->
+
+        <section class="page" id="queue">
+          <div class="page-heading">
+            <div>
+              <h1>OPD Queue</h1>
+
+              <p>Manage patients waiting for consultation.</p>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <h2 id="waitingCount">0</h2>
+
+              <p>Waiting</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>5</h2>
+
+              <p>Checked In</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>3</h2>
+
+              <p>In Consultation</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>18</h2>
+
+              <p>Completed</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Current Queue</h3>
+            </div>
+
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Queue No.</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Arrival</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="queueTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     BILLING
+===================================================== -->
+
+        <section class="page" id="billing">
+          <div class="page-heading">
+            <div>
+              <h1>Billing</h1>
+
+              <p>Manage patient bills and payments.</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openModal('billModal')">
+              <i class="bi bi-plus"></i>
+              Create Bill
+            </button>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <h2>₹24,500</h2>
+
+              <p>Today's Revenue</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>09</h2>
+
+              <p>Pending Bills</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>35</h2>
+
+              <p>Paid Bills</p>
+            </div>
+
+            <div class="stat-card">
+              <h2>₹2,500</h2>
+
+              <p>Refunds</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bill ID</th>
+                    <th>Patient</th>
+                    <th>Service</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="billingTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     REPORTS
+===================================================== -->
+
+        <section class="page" id="reports">
+          <div class="page-heading">
+            <div>
+              <h1>Reports</h1>
+
+              <p>View daily hospital reception reports.</p>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-people"></i>
+              </div>
+
+              <h2>67</h2>
+
+              <p>Total Patients Today</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-calendar"></i>
+              </div>
+
+              <h2>48</h2>
+
+              <p>Appointments</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-check-circle"></i>
+              </div>
+
+              <h2>35</h2>
+
+              <p>Completed Visits</p>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-currency-rupee"></i>
+              </div>
+
+              <h2>₹24,500</h2>
+
+              <p>Revenue</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Generate Report</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="toolbar">
+                <select class="form-select">
+                  <option>Patient Registration Report</option>
+
+                  <option>Appointment Report</option>
+
+                  <option>Revenue Report</option>
+
+                  <option>Queue Report</option>
+                </select>
+
+                <input type="date" class="form-control" />
+
+                <button class="btn btn-primary" onclick="generateReport()">
+                  <i class="bi bi-download"></i>
+                  Generate
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+     SETTINGS
+===================================================== -->
+
+        <section class="page" id="settings">
+          <div class="page-heading">
+            <div>
+              <h1>Settings</h1>
+
+              <p>Manage receptionist and hospital settings.</p>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Receptionist Profile</h3>
+
+              <div class="row">
+                <div class="form-group col-md-6">
+                  <label> Full Name </label>
+
+                  <input value="Reception Staff" id="settingsName" />
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label> Email </label>
+
+                  <input value="reception@carepoint.com" type="email" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Hospital Information</h3>
+
+              <div class="form-group">
+                <label> Hospital Name </label>
+
+                <input value="CarePoint Hospital" />
+              </div>
+
+              <div class="form-group">
+                <label> Hospital Address </label>
+
+                <textarea rows="3">
+123 Healthcare Avenue, Kolkata, West Bengal</textarea
+                >
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveSettings()">
+              <i class="bi bi-check"></i>
+              Save Changes
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- =====================================================
+     PATIENT MODAL
+===================================================== -->
+
+    <div class="modal" id="patientModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Register New Patient</h3>
+
+          <button class="close" onclick="closeModal('patientModal')">
+            &times;
+          </button>
+        </div>
+
+        <form id="patientForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label> Full Name * </label>
+
+              <input id="patientName" required />
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-6">
+                <label> Age * </label>
+
+                <input id="patientAge" type="number" required />
+              </div>
+
+              <div class="form-group col-md-6">
+                <label> Gender * </label>
+
+                <select id="patientGender" required>
+                  <option value="">Select</option>
+
+                  <option>Male</option>
+
+                  <option>Female</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label> Phone Number * </label>
+
+              <input id="patientPhone" type="tel" required />
+            </div>
+
+            <div class="form-group">
+              <label> Department </label>
+
+              <select id="patientDepartment">
+                <option>General Medicine</option>
+
+                <option>Cardiology</option>
+
+                <option>Orthopedics</option>
+
+                <option>Dermatology</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeModal('patientModal')"
+            >
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+              Register Patient
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     APPOINTMENT MODAL
+===================================================== -->
+
+    <div class="modal" id="appointmentModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Book Appointment</h3>
+
+          <button class="close" onclick="closeModal('appointmentModal')">
+            &times;
+          </button>
+        </div>
+
+        <form id="appointmentForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label> Patient * </label>
+
+              <select id="appointmentPatient" required></select>
+            </div>
+
+            <div class="form-group">
+              <label> Doctor * </label>
+
+              <select id="appointmentDoctor" required>
+                <option>Dr. Amit Mehta</option>
+
+                <option>Dr. Priya Roy</option>
+
+                <option>Dr. Rahul Sen</option>
+
+                <option>Dr. Neha Singh</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-6">
+                <label> Date * </label>
+
+                <input type="date" id="newAppointmentDate" required />
+              </div>
+
+              <div class="form-group col-md-6">
+                <label> Time * </label>
+
+                <input type="time" id="newAppointmentTime" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label> Appointment Type </label>
+
+              <select id="appointmentType">
+                <option>New Visit</option>
+
+                <option>Follow-up</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeModal('appointmentModal')"
+            >
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+              Book Appointment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     BILL MODAL
+===================================================== -->
+
+    <div class="modal" id="billModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Create Bill</h3>
+
+          <button class="close" onclick="closeModal('billModal')">
+            &times;
+          </button>
+        </div>
+
+        <form id="billForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label> Patient * </label>
+
+              <select id="billPatient" required></select>
+            </div>
+
+            <div class="form-group">
+              <label> Service </label>
+
+              <select id="billService">
+                <option>Doctor Consultation</option>
+
+                <option>Follow-up Consultation</option>
+
+                <option>Laboratory Test</option>
+
+                <option>Other Service</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label> Amount * </label>
+
+              <input type="number" id="billAmount" required />
+            </div>
+
+            <div class="form-group">
+              <label> Payment Method </label>
+
+              <select id="paymentMethod">
+                <option>Cash</option>
+
+                <option>UPI</option>
+
+                <option>Card</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeModal('billModal')"
+            >
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn-primary">Create Bill</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+
+    <div class="toast" id="toast"></div>
+
+    <!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+    <script></script>
+    <script src="admin/script.js"></script>
+  </body>
+</html>

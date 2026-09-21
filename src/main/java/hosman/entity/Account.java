@@ -1,4 +1,4 @@
-package hosman.user;
+package hosman.entity;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -8,8 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
 @Entity
-@Table(name = "users")
-public class UserProfile {
+@Table(name = "accounts")
+public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,23 +19,27 @@ public class UserProfile {
     public String username;
 
     @Column(nullable = false)
-    public String password;
+    public String hashedPassword;
 
     @Column(nullable = false)
     public String role;
 
     // No-argument constructor required by JPA
-    protected UserProfile() {
+    protected Account() {
     }
 
-    public UserProfile(String username, String password, String role) {
+    public Account(String username, String hashedPassword, String role) {
+
         this.username = username;
-        this.password = password;
+        this.hashedPassword = hashedPassword;
         this.role = role;
+
     }
 
     public Long getID() {
+
         return this.id;
+
     }
 
 }
