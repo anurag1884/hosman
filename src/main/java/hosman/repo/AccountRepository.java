@@ -1,10 +1,10 @@
 package hosman.repo;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import hosman.entity.Account;
-
-import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
 

@@ -1,8 +1,5 @@
 package hosman.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import hosman.entity.Doctor;
@@ -16,24 +13,6 @@ public class DoctorService {
     public DoctorService(DoctorRepository repo) {
 
         this.docRepo = repo;
-
-    }
-
-    public Doctor getDoctor(Long id) {
-
-        return this.docRepo.findById(id).orElseThrow();
-
-    }
-
-    public Optional<Doctor> getDoctor(String username) {
-
-        return this.docRepo.findByAccountUsername(username);
-
-    }
-
-    public List<Doctor> getAllDoctors() {
-
-        return this.docRepo.findAll();
 
     }
 

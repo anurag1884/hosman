@@ -1,10 +1,10 @@
 package hosman.repo;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import hosman.entity.Patient;
-
-import java.util.Optional;
 
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 

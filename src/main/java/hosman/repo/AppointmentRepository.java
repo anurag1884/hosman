@@ -1,10 +1,10 @@
 package hosman.repo;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import hosman.entity.Appointment;
-
-import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 

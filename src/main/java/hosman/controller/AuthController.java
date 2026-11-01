@@ -5,50 +5,62 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
-
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import hosman.entity.Account;
-import hosman.entity.Patient;
-import hosman.enums.Gender;
-import hosman.repo.AccountRepository;
-import hosman.service.AccountService;
-import hosman.service.PatientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import hosman.entity.Account;
+import hosman.entity.Doctor;
+import hosman.entity.Nurse;
+import hosman.entity.Patient;
+import hosman.entity.Profile;
+import hosman.entity.Receptionist;
+import hosman.enums.Role;
+import hosman.repo.AccountRepository;
+import hosman.service.AccountService;
+import hosman.service.DoctorService;
+import hosman.service.NurseService;
+import hosman.service.PatientService;
+import hosman.service.ProfileService;
+import hosman.service.ReceptionistService;
 
 @RestController
 public class AuthController {
 
     private final AuthenticationManager manager;
 
-    private final AccountRepository accRepo;
     private final SecurityContextRepository securityRepo;
 
     private final AccountService accService;
+
+    private final DoctorService docService;
+    private final NurseService nurseService;
+    private final ReceptionistService recepService;
     private final PatientService patService;
 
+    private final ProfileService profileService;
+
     public AuthController(AuthenticationManager manager, AccountRepository repo, SecurityContextRepository securityRepo,
-            AccountService accService, PatientService patService) {
+            AccountService accService, DoctorService docService, NurseService nurseService,
+            ReceptionistService recepService, PatientService patService, ProfileService profileService) {
 
         this.manager = manager;
 
-        this.accRepo = repo;
         this.securityRepo = securityRepo;
 
         this.accService = accService;
+        this.docService = docService;
+        this.nurseService = nurseService;
+        this.recepService = recepService;
         this.patService = patService;
+
+        this.profileService = profileService;
 
     }
 
@@ -69,7 +81,7 @@ public class AuthController {
 
         String username = req.username().trim();
 
-        if (!accRepo.findByUsername(username).isPresent())
+        if (!accService.getAccount(username).isPresent())
             return new AuthResponse(false, "Username '" + username + "' does not exist.");
 
         Authentication auth;
@@ -94,57 +106,26 @@ public class AuthController {
 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest req) {
-
         String username = req.username().trim();
 
-        if (accRepo.findByUsername(username).isPresent())
+        if (!username.matches("[a-zA-Z][a-zA-Z0-9]*"))
+            return new AuthResponse(false, "Username '" + username + "' is invalid.");
+
+        if (accService.getAccount(username).isPresent())
             return new AuthResponse(false, "Username '" + username + "' is already taken.");
 
-        String firstName = req.firstName().trim();
+        String password = req.password();
 
-        if (!checkName(firstName))
-            return new AuthResponse(false, "First name '" + firstName + "' is invalid.");
+        if (password.length() < 8)
+            return new AuthResponse(false, "Password is too short.");
 
-        String middleName = req.middleName() == null
-                ? ""
-                : req.middleName().trim();
+        Account acc = accService.saveAccount(username, password, Role.PATIENT);
 
-        if (!middleName.isEmpty() && !checkName(middleName))
-            return new AuthResponse(false, "Middle name '" + middleName + "' is invalid.");
+        patService.savePatient(new Patient(acc, req.bloodGroup()));
 
-        String lastName = req.lastName().trim();
+        Profile profile = new Profile(acc);
 
-        if (!checkName(lastName))
-            return new AuthResponse(false, "Last name '" + lastName + "' is invalid.");
-
-        Gender gender = switch (req.gender()) {
-            case "male" -> Gender.Male;
-            case "female" -> Gender.Female;
-            case "other" -> Gender.Other;
-            default -> Gender.Unknown;
-        };
-
-        // if (gender == Gender.Unknown)
-        // return new AuthResponse(false, "Unknown gender encountered.");
-
-        Account account = accService.saveAccount(username, req.password(), "USER");
-
-        LocalDate dob = req.dateOfBirth(),
-                now = LocalDate.now();
-
-        if (dob.isAfter(now))
-            return new AuthResponse(false, "Invalid DOB '" + dob.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                    + "'. Please select a proper DOB.");
-
-        int age = Period.between(dob, now).getYears();
-
-        String phoneNumber = req.phoneNumber().trim();
-        if (!phoneNumber.matches("\\\\+?[0-9 ()-]{7,20}"))
-            new AuthResponse(false,
-                    "Invalid phone number '" + req.phoneNumber + "'. Please enter a valid phone number.");
-
-        patService.savePatient(
-                new Patient(account, firstName, middleName, lastName, age, req.bloodGroup(), dob, gender, phoneNumber));
+        profileService.saveProfile(profile);
 
         return new AuthResponse(true, "SUCCESS");
 
@@ -155,23 +136,47 @@ public class AuthController {
 
         String username = req.username().trim();
 
-        if (!accRepo.findByUsername(username).isEmpty())
-            return new AuthResponse(false, "Username '" + username + "' is already taken.");
-
         if (!username.matches("[a-zA-Z][a-zA-Z0-9]*"))
             return new AuthResponse(false, "Username '" + username + "' is invalid.");
 
-        accService.saveAccount(username, req.password(), req.role());
+        if (!accService.getAccount(username).isEmpty())
+            return new AuthResponse(false, "Username '" + username + "' is already taken.");
+
+        String password = req.password();
+
+        if (password.length() < 8)
+            return new AuthResponse(false, "Password is too short.");
+
+        Role role = req.role();
+
+        if (role == null)
+            return new AuthResponse(false, "Role '" + role + "' is invalid.");
+
+        Account acc = accService.saveAccount(username, password, req.role());
+
+        switch (role) {
+            case DOCTOR -> {
+                docService.saveDoctor(new Doctor(acc));
+            }
+            case NURSE -> {
+                nurseService.saveNurse(new Nurse(acc));
+            }
+            case RECEPTIONIST -> {
+                recepService.saveReceptionist(new Receptionist(acc));
+            }
+            case PATIENT -> {
+                patService.savePatient(new Patient(acc));
+            }
+            default -> {
+            }
+        }
+
+        Profile profile = new Profile(acc);
+
+        profileService.saveProfile(profile);
 
         return new AuthResponse(true, "SUCCESS");
 
-    }
-
-    //
-    // Private methods
-    //
-    private boolean checkName(String name) {
-        return name.matches("[a-zA-Z]+(?:[ '-][a-zA-Z]+)*");
     }
 
     //
@@ -186,19 +191,13 @@ public class AuthController {
     public record RegisterRequest(
             @NotBlank String username,
             @NotBlank String password,
-            @NotBlank String firstName,
-            String middleName,
-            @NotBlank String lastName,
-            @NotNull LocalDate dateOfBirth,
-            @NotBlank String gender,
-            @NotBlank String bloodGroup,
-            @NotBlank String phoneNumber) {
+            String bloodGroup) {
     }
 
     public record PrivilegedRegisterRequest(
             @NotBlank String username,
             @NotBlank String password,
-            @NotBlank String role) {
+            @NotBlank Role role) {
     }
 
     public record AuthResponse(boolean success, String message) {

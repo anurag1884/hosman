@@ -2,16 +2,11 @@ package hosman.entity;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-
-import java.time.LocalDate;
-
-import hosman.enums.Gender;
 
 @Entity
 @Table(name = "patients")
@@ -22,48 +17,29 @@ public class Patient {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "id", nullable = false, unique = true)
+    @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
 
-    @Column(nullable = false)
-    public String firstName;
-
-    public String middleName;
-
-    @Column(nullable = false)
-    public String lastName;
-
-    @Column(nullable = false)
-    public int age;
-
-    @Column(nullable = false)
     public String bloodGroup;
 
-    @Column(nullable = false)
-    public LocalDate dateOfBirth;
+    // No-argument constructor required by JPA
+    protected Patient() {
+    }
 
-    @Column(nullable = false)
-    public Gender gender;
-
-    @Column(nullable = false)
-    public String phoneNumber;
-
-    public Patient(Account account, String firstName, String middleName, String lastName, int age, String bloodGroup,
-            LocalDate dateOfBirth, Gender gender, String phoneNumber) {
+    public Patient(Account account) {
 
         this.account = account;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.age = age;
-        this.bloodGroup = bloodGroup;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.phoneNumber = phoneNumber;
 
     }
 
-    public Long getID() {
+    public Patient(Account account, String bloodGroup) {
+
+        this.account = account;
+        this.bloodGroup = bloodGroup;
+
+    }
+
+    public Long getId() {
 
         return this.id;
 

@@ -1,1294 +1,422 @@
-/* =====================================================
-   DATA
-===================================================== */
-
-let patients = [
-  {
-    id: "PID-1001",
-    name: "Rahul Sharma",
-    age: 32,
-    gender: "Male",
-    phone: "9876543210",
-    lastVisit: "18 Sep 2026",
-  },
-
-  {
-    id: "PID-1002",
-    name: "Ananya Das",
-    age: 27,
-    gender: "Female",
-    phone: "9876543211",
-    lastVisit: "18 Sep 2026",
-  },
-
-  {
-    id: "PID-1003",
-    name: "Arjun Kumar",
-    age: 45,
-    gender: "Male",
-    phone: "9876543212",
-    lastVisit: "17 Sep 2026",
-  },
-
-  {
-    id: "PID-1004",
-    name: "Sneha Gupta",
-    age: 29,
-    gender: "Female",
-    phone: "9876543213",
-    lastVisit: "16 Sep 2026",
-  },
+const $ = (s) => document.querySelector(s),
+  $$ = (s) => [...document.querySelectorAll(s)],
+  today = new Date().toISOString().slice(0, 10);
+let users = [
+  ["olivia.m", "Olivia Martin", "Admin", "General", "Active"],
+  ["amelia.chen", "Dr. Amelia Chen", "Doctor", "Cardiology", "Active"],
+  ["noah.w", "Dr. Noah Williams", "Doctor", "Neurology", "Active"],
+  ["priya.sharma", "Dr. Priya Sharma", "Doctor", "Orthopedics", "Active"],
+  ["ethan.p", "Dr. Ethan Patel", "Doctor", "Pediatrics", "Active"],
+  ["mia.johnson", "Mia Johnson", "Nurse", "Cardiology", "Active"],
+  ["sophia.d", "Sophia Davis", "Nurse", "General", "Active"],
+  ["james.w", "James Wilson", "Receptionist", "General", "Active"],
+  ["ava.brown", "Ava Brown", "Receptionist", "General", "Inactive"],
+  ["patient.lee", "Daniel Lee", "Patient", "General", "Active"],
+  ["patient.khan", "Sara Khan", "Patient", "General", "Active"],
+  ["admin.r", "Robert Green", "Admin", "General", "Active"],
 ];
-
-let appointments = [
-  {
-    id: "APT-001",
-    time: "09:00 AM",
-    patient: "Rahul Sharma",
-    doctor: "Dr. Amit Mehta",
-    department: "Cardiology",
-    status: "Confirmed",
-  },
-
-  {
-    id: "APT-002",
-    time: "09:30 AM",
-    patient: "Ananya Das",
-    doctor: "Dr. Priya Roy",
-    department: "General Medicine",
-    status: "Waiting",
-  },
-
-  {
-    id: "APT-003",
-    time: "10:00 AM",
-    patient: "Arjun Kumar",
-    doctor: "Dr. Rahul Sen",
-    department: "Orthopedics",
-    status: "Waiting",
-  },
-
-  {
-    id: "APT-004",
-    time: "10:30 AM",
-    patient: "Sneha Gupta",
-    doctor: "Dr. Neha Singh",
-    department: "Dermatology",
-    status: "Confirmed",
-  },
-];
-
-let doctors = [
-  {
-    name: "Dr. Amit Mehta",
-    department: "Cardiology",
-    room: "204",
-    hours: "09 AM - 02 PM",
-    status: "Available",
-    next: "11:30 AM",
-  },
-
-  {
-    name: "Dr. Priya Roy",
-    department: "General Medicine",
-    room: "108",
-    hours: "09 AM - 04 PM",
-    status: "Busy",
-    next: "12:00 PM",
-  },
-
-  {
-    name: "Dr. Rahul Sen",
-    department: "Orthopedics",
-    room: "302",
-    hours: "10 AM - 03 PM",
-    status: "Available",
-    next: "11:45 AM",
-  },
-
-  {
-    name: "Dr. Neha Singh",
-    department: "Dermatology",
-    room: "205",
-    hours: "10 AM - 04 PM",
-    status: "Available",
-    next: "12:30 PM",
-  },
-];
-
-let queue = [
-  {
-    number: 1,
-    patient: "Ananya Das",
-    doctor: "Dr. Priya Roy",
-    department: "General Medicine",
-    arrival: "09:25 AM",
-    status: "Waiting",
-  },
-
-  {
-    number: 2,
-    patient: "Arjun Kumar",
-    doctor: "Dr. Rahul Sen",
-    department: "Orthopedics",
-    arrival: "09:45 AM",
-    status: "Waiting",
-  },
-
-  {
-    number: 3,
-    patient: "Rahul Sharma",
-    doctor: "Dr. Amit Mehta",
-    department: "Cardiology",
-    arrival: "10:00 AM",
-    status: "Waiting",
-  },
-];
-
+let appts = [
+  ["09:00", "Daniel Lee", "Dr. Amelia Chen", "Cardiology", "Confirmed"],
+  ["09:30", "Sara Khan", "Dr. Noah Williams", "Neurology", "Waiting"],
+  ["10:00", "Michael Turner", "Dr. Priya Sharma", "Orthopedics", "Confirmed"],
+  ["10:30", "Emma Wilson", "Dr. Ethan Patel", "Pediatrics", "Completed"],
+  ["11:00", "Lucas Martin", "Dr. Amelia Chen", "Cardiology", "Waiting"],
+  ["11:30", "Isabella Clark", "Dr. Noah Williams", "Neurology", "Cancelled"],
+  ["12:00", "Oliver White", "Dr. Priya Sharma", "Orthopedics", "Confirmed"],
+  ["13:00", "Sophia Moore", "Dr. Ethan Patel", "Pediatrics", "Confirmed"],
+].map((a) => ({
+  time: a[0],
+  patient: a[1],
+  doctor: a[2],
+  department: a[3],
+  status: a[4],
+  date: today,
+}));
 let bills = [
-  {
-    id: "INV-1001",
-    patient: "Rahul Sharma",
-    service: "Consultation",
-    amount: 800,
-    payment: "Paid",
-    date: "18 Sep 2026",
-  },
-
-  {
-    id: "INV-1002",
-    patient: "Ananya Das",
-    service: "Consultation",
-    amount: 600,
-    payment: "Pending",
-    date: "18 Sep 2026",
-  },
-
-  {
-    id: "INV-1003",
-    patient: "Arjun Kumar",
-    service: "Consultation",
-    amount: 700,
-    payment: "Paid",
-    date: "18 Sep 2026",
-  },
-];
-
-/* =====================================================
-   PAGE NAVIGATION
-===================================================== */
-
-const navLinks = document.querySelectorAll(".nav-link[data-page]");
-
-navLinks.forEach((link) => {
-  link.addEventListener("click", function () {
-    const page = this.dataset.page;
-
-    openPage(page);
-
-    document.querySelector(".sidebar").classList.remove("open");
-  });
-});
-
-function openPage(pageName) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.remove("active");
-  });
-
-  const selectedPage = document.getElementById(pageName);
-
-  if (selectedPage) {
-    selectedPage.classList.add("active");
-  }
-
-  navLinks.forEach((link) => {
-    link.classList.remove("active");
-
-    if (link.dataset.page === pageName) {
-      link.classList.add("active");
-    }
-  });
-
-  const titles = {
-    dashboard: "Dashboard",
-    patients: "Patients",
-    appointments: "Appointments",
-    doctors: "Doctors",
-    queue: "OPD Queue",
-    billing: "Billing",
-    reports: "Reports",
-    settings: "Settings",
-  };
-
-  document.getElementById("headerTitle").textContent =
-    titles[pageName] || "Dashboard";
-
-  if (pageName === "patients") renderPatients();
-
-  if (pageName === "appointments") renderAppointments();
-
-  if (pageName === "doctors") renderDoctors();
-
-  if (pageName === "queue") renderQueue();
-
-  if (pageName === "billing") renderBills();
+  ["Daniel Lee", "Consultation", 1200, "Paid"],
+  ["Sara Khan", "Therapy", 2400, "Pending"],
+  ["Michael Turner", "Lab test", 850, "Paid"],
+  ["Emma Wilson", "Imaging", 3200, "Pending"],
+  ["Lucas Martin", "Consultation", 1000, "Paid"],
+].map((a) => ({
+  patient: a[0],
+  service: a[1],
+  amount: a[2],
+  status: a[3],
+  date: today,
+}));
+let userSort = "username",
+  userDir = 1,
+  apptSort = "time",
+  apptDir = 1,
+  photo = $("#topPhoto").src;
+function badge(s) {
+  return `<span class="badge ${["Paid", "Completed", "Active"].includes(s) ? "green" : ["Waiting", "Pending"].includes(s) ? "amber" : ["Cancelled", "Inactive"].includes(s) ? "red" : ""}">${s}</span>`;
 }
-
-/* =====================================================
-   MODALS
-===================================================== */
-
-function openModal(id) {
-  const modal = document.getElementById(id);
-
-  if (modal) {
-    modal.classList.add("show");
-  }
-
-  populatePatientDropdowns();
+function person(n) {
+  return `<b>${n}</b>`;
 }
-
-function closeModal(id) {
-  const modal = document.getElementById(id);
-
-  if (modal) {
-    modal.classList.remove("show");
-  }
+function money(n) {
+  return "₹" + n.toLocaleString("en-IN");
 }
-
-/* Close modal when clicking outside */
-
-document.querySelectorAll(".modal").forEach((modal) => {
-  modal.addEventListener("click", function (e) {
-    if (e.target === modal) {
-      modal.classList.remove("show");
-    }
-  });
-});
-
-/* =====================================================
-   PATIENTS
-===================================================== */
-
-function renderPatients() {
-  const table = document.getElementById("patientsTable");
-
-  const search = document.getElementById("patientSearch").value.toLowerCase();
-
-  const gender = document.getElementById("genderFilter").value;
-
-  const filtered = patients.filter((patient) => {
-    const matchesSearch =
-      patient.name.toLowerCase().includes(search) ||
-      patient.id.toLowerCase().includes(search) ||
-      patient.phone.includes(search);
-
-    const matchesGender = !gender || patient.gender === gender;
-
-    return matchesSearch && matchesGender;
-  });
-
-  table.innerHTML = "";
-
-  if (filtered.length === 0) {
-    table.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    <div class="empty">
-                        <i class="bi bi-person-x"></i>
-                        <p>No patients found.</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-    return;
-  }
-
-  filtered.forEach((patient) => {
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    <strong>${patient.id}</strong>
-                </td>
-
-                <td>
-
-                    <span class="patient-name">
-                        ${patient.name}
-                    </span>
-
-                </td>
-
-                <td>
-                    ${patient.age}
-                </td>
-
-                <td>
-                    ${patient.gender}
-                </td>
-
-                <td>
-                    ${patient.phone}
-                </td>
-
-                <td>
-                    ${patient.lastVisit}
-                </td>
-
-                <td>
-
-                    <button
-                        class="btn btn-secondary btn-small"
-                        onclick="viewPatient('${patient.id}')"
-                    >
-                        View
-                    </button>
-
-                    <button
-                        class="btn btn-primary btn-small"
-                        onclick="bookForPatient('${patient.name}')"
-                    >
-                        Book
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `;
-  });
+function go(p) {
+  $$(".view").forEach((v) => v.classList.toggle("active", v.id === p));
+  $$(".nav button").forEach((b) =>
+    b.classList.toggle("active", b.dataset.page === p),
+  );
+  $("#sidebar").classList.remove("open");
+  $("#dropdown").classList.remove("open");
+  if (p === "users") renderUsers();
+  if (p === "appointments") renderAppts();
+  if (p === "queue") renderQueue();
+  if (p === "billing") renderBills();
 }
-
-/* =====================================================
-   ADD PATIENT
-===================================================== */
-
-document.getElementById("patientForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const name = document.getElementById("patientName").value.trim();
-
-  const age = document.getElementById("patientAge").value;
-
-  const gender = document.getElementById("patientGender").value;
-
-  const phone = document.getElementById("patientPhone").value.trim();
-
-  if (!name || !age || !gender || !phone) {
-    showToast("Please fill all required fields.");
-
-    return;
-  }
-
-  const newPatient = {
-    id: "PID-" + (1000 + patients.length + 1),
-
-    name: name,
-
-    age: age,
-
-    gender: gender,
-
-    phone: phone,
-
-    lastVisit: "18 Sep 2026",
-  };
-
-  patients.push(newPatient);
-
-  renderPatients();
-
-  updateDashboard();
-
-  closeModal("patientModal");
-
-  this.reset();
-
-  showToast("Patient registered successfully!");
-});
-
-/* =====================================================
-   VIEW PATIENT
-===================================================== */
-
-function viewPatient(id) {
-  const patient = patients.find((p) => p.id === id);
-
-  if (!patient) return;
-
-  alert(
-    "PATIENT PROFILE\n\n" +
-      "Patient ID: " +
-      patient.id +
-      "\n" +
-      "Name: " +
-      patient.name +
-      "\n" +
-      "Age: " +
-      patient.age +
-      "\n" +
-      "Gender: " +
-      patient.gender +
-      "\n" +
-      "Phone: " +
-      patient.phone +
-      "\n" +
-      "Last Visit: " +
-      patient.lastVisit,
+$$("[data-page]").forEach((b) => (b.onclick = () => go(b.dataset.page)));
+$("#mobile").onclick = () => $("#sidebar").classList.toggle("open");
+$("#profileBtn").onclick = () => $("#dropdown").classList.toggle("open");
+$("#logout").onclick = () =>
+  confirm("Log out of Northstar HMS?") &&
+  alert("Demo logout. Connect this action to authentication.");
+function updateCounts() {
+  let roles = ["Patient", "Doctor", "Nurse", "Admin", "Receptionist"];
+  roles.forEach(
+    (r) =>
+      ($("#count" + r).textContent = users.filter((u) => u[2] === r).length),
   );
 }
-
-/* =====================================================
-   APPOINTMENTS
-===================================================== */
-
-function renderAppointments() {
-  const table = document.getElementById("appointmentsTable");
-
-  table.innerHTML = "";
-
-  appointments.forEach((appointment, index) => {
-    let statusClass = "status-confirmed";
-
-    if (appointment.status === "Waiting") statusClass = "status-waiting";
-
-    if (appointment.status === "Completed") statusClass = "status-completed";
-
-    if (appointment.status === "Cancelled") statusClass = "status-cancelled";
-
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    ${appointment.id}
-                </td>
-
-                <td>
-                    ${appointment.time}
-                </td>
-
-                <td>
-                    <span class="patient-name">
-                        ${appointment.patient}
-                    </span>
-                </td>
-
-                <td>
-                    ${appointment.doctor}
-                </td>
-
-                <td>
-                    ${appointment.department}
-                </td>
-
-                <td>
-
-                    <span class="status ${statusClass}">
-                        ${appointment.status}
-                    </span>
-
-                </td>
-
-                <td>
-
-                    ${
-                      appointment.status !== "Cancelled"
-                        ? `
-                        <button
-                            class="btn btn-success btn-small"
-                            onclick="checkInAppointment(${index})"
-                        >
-                            Check-in
-                        </button>
-
-                        <button
-                            class="btn btn-danger btn-small"
-                            onclick="cancelAppointment(${index})"
-                        >
-                            Cancel
-                        </button>
-                        `
-                        : ""
-                    }
-
-                </td>
-
-            </tr>
-
-        `;
-  });
-}
-
-/* =====================================================
-   BOOK APPOINTMENT
-===================================================== */
-
-document
-  .getElementById("appointmentForm")
-  .addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const patient = document.getElementById("appointmentPatient").value;
-
-    const doctor = document.getElementById("appointmentDoctor").value;
-
-    const date = document.getElementById("newAppointmentDate").value;
-
-    const time = document.getElementById("newAppointmentTime").value;
-
-    if (!patient || !doctor || !date || !time) {
-      showToast("Please fill all appointment details.");
-
-      return;
-    }
-
-    const formattedTime = formatTime(time);
-
-    let department = "General Medicine";
-
-    if (doctor.includes("Amit")) department = "Cardiology";
-
-    if (doctor.includes("Rahul")) department = "Orthopedics";
-
-    if (doctor.includes("Neha")) department = "Dermatology";
-
-    appointments.push({
-      id: "APT-" + String(appointments.length + 1).padStart(3, "0"),
-
-      time: formattedTime,
-
-      patient: patient,
-
-      doctor: doctor,
-
-      department: department,
-
-      status: "Confirmed",
-    });
-
-    renderAppointments();
-
-    updateDashboard();
-
-    closeModal("appointmentModal");
-
-    this.reset();
-
-    showToast("Appointment booked successfully!");
-  });
-
-function formatTime(time) {
-  const [hour, minute] = time.split(":");
-
-  let h = parseInt(hour);
-
-  const ampm = h >= 12 ? "PM" : "AM";
-
-  h = h % 12 || 12;
-
-  return `${h}:${minute} ${ampm}`;
-}
-
-/* =====================================================
-   BOOK FOR PATIENT
-===================================================== */
-
-function bookForPatient(name) {
-  openPage("appointments");
-
-  openModal("appointmentModal");
-
-  setTimeout(() => {
-    const select = document.getElementById("appointmentPatient");
-
-    select.value = name;
-  }, 100);
-}
-
-/* =====================================================
-   CHECK-IN
-===================================================== */
-
-function checkInAppointment(index) {
-  const appointment = appointments[index];
-
-  appointment.status = "Waiting";
-
-  const alreadyInQueue = queue.some((q) => q.patient === appointment.patient);
-
-  if (!alreadyInQueue) {
-    queue.push({
-      number: queue.length + 1,
-
-      patient: appointment.patient,
-
-      doctor: appointment.doctor,
-
-      department: appointment.department,
-
-      arrival: "Now",
-
-      status: "Waiting",
-    });
-  }
-
-  renderAppointments();
-
-  renderQueue();
-
-  updateDashboard();
-
-  showToast(appointment.patient + " checked in successfully.");
-}
-
-/* =====================================================
-   CANCEL APPOINTMENT
-===================================================== */
-
-function cancelAppointment(index) {
-  if (confirm("Are you sure you want to cancel this appointment?")) {
-    appointments[index].status = "Cancelled";
-
-    renderAppointments();
-
-    updateDashboard();
-
-    showToast("Appointment cancelled.");
-  }
-}
-
-/* =====================================================
-   DOCTORS
-===================================================== */
-
-function renderDoctors() {
-  const table = document.getElementById("doctorsTable");
-
-  table.innerHTML = "";
-
-  doctors.forEach((doctor) => {
-    const statusClass =
-      doctor.status === "Available" ? "status-available" : "status-busy";
-
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    <strong>
-                        ${doctor.name}
-                    </strong>
-                </td>
-
-                <td>
-                    ${doctor.department}
-                </td>
-
-                <td>
-                    Room ${doctor.room}
-                </td>
-
-                <td>
-                    ${doctor.hours}
-                </td>
-
-                <td>
-
-                    <span class="status ${statusClass}">
-                        ${doctor.status}
-                    </span>
-
-                </td>
-
-                <td>
-                    ${doctor.next}
-                </td>
-
-            </tr>
-
-        `;
-  });
-}
-
-/* =====================================================
-   QUEUE
-===================================================== */
-
-function renderQueue() {
-  const table = document.getElementById("queueTable");
-
-  table.innerHTML = "";
-
-  const waiting = queue.filter((q) => q.status === "Waiting");
-
-  document.getElementById("waitingCount").textContent = waiting.length;
-
-  document.getElementById("dashboardQueue").textContent = waiting.length;
-
-  queue.forEach((item, index) => {
-    const statusClass =
-      item.status === "Waiting" ? "status-waiting" : "status-completed";
-
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    <strong>
-                        Q-${String(item.number).padStart(2, "0")}
-                    </strong>
-                </td>
-
-                <td>
-                    ${item.patient}
-                </td>
-
-                <td>
-                    ${item.doctor}
-                </td>
-
-                <td>
-                    ${item.department}
-                </td>
-
-                <td>
-                    ${item.arrival}
-                </td>
-
-                <td>
-
-                    <span class="status ${statusClass}">
-                        ${item.status}
-                    </span>
-
-                </td>
-
-                <td>
-
-                    ${
-                      item.status === "Waiting"
-                        ? `
-                        <button
-                            class="btn btn-success btn-small"
-                            onclick="completeQueue(${index})"
-                        >
-                            Complete
-                        </button>
-                        `
-                        : ""
-                    }
-
-                </td>
-
-            </tr>
-
-        `;
-  });
-}
-
-/* =====================================================
-   COMPLETE QUEUE
-===================================================== */
-
-function completeQueue(index) {
-  queue[index].status = "Completed";
-
-  renderQueue();
-
-  updateDashboard();
-
-  showToast(queue[index].patient + " consultation completed.");
-}
-
-/* =====================================================
-   BILLING
-===================================================== */
-
-function renderBills() {
-  const table = document.getElementById("billingTable");
-
-  table.innerHTML = "";
-
-  bills.forEach((bill, index) => {
-    const paymentClass =
-      bill.payment === "Paid" ? "status-confirmed" : "status-waiting";
-
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    ${bill.id}
-                </td>
-
-                <td>
-                    ${bill.patient}
-                </td>
-
-                <td>
-                    ${bill.service}
-                </td>
-
-                <td>
-                    ₹${bill.amount}
-                </td>
-
-                <td>
-
-                    <span class="status ${paymentClass}">
-                        ${bill.payment}
-                    </span>
-
-                </td>
-
-                <td>
-                    ${bill.date}
-                </td>
-
-                <td>
-
-                    ${
-                      bill.payment === "Pending"
-                        ? `
-                        <button
-                            class="btn btn-success btn-small"
-                            onclick="collectPayment(${index})"
-                        >
-                            Collect
-                        </button>
-                        `
-                        : `
-                        <button
-                            class="btn btn-secondary btn-small"
-                            onclick="printBill(${index})"
-                        >
-                            Print
-                        </button>
-                        `
-                    }
-
-                </td>
-
-            </tr>
-
-        `;
-  });
-}
-
-/* =====================================================
-   CREATE BILL
-===================================================== */
-
-document.getElementById("billForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const patient = document.getElementById("billPatient").value;
-
-  const service = document.getElementById("billService").value;
-
-  const amount = document.getElementById("billAmount").value;
-
-  if (!patient || !amount) {
-    showToast("Please fill the required fields.");
-
-    return;
-  }
-
-  bills.push({
-    id: "INV-" + (1000 + bills.length + 1),
-
-    patient: patient,
-
-    service: service,
-
-    amount: amount,
-
-    payment: "Pending",
-
-    date: "18 Sep 2026",
-  });
-
-  renderBills();
-
-  closeModal("billModal");
-
-  this.reset();
-
-  showToast("Bill created successfully!");
-});
-
-/* =====================================================
-   COLLECT PAYMENT
-===================================================== */
-
-function collectPayment(index) {
-  bills[index].payment = "Paid";
-
-  renderBills();
-
-  showToast("Payment collected successfully.");
-}
-
-/* =====================================================
-   PRINT BILL
-===================================================== */
-
-function printBill(index) {
-  const bill = bills[index];
-
-  const printWindow = window.open("", "_blank");
-
-  printWindow.document.write(`
-
-        <html>
-
-        <head>
-
-            <title>${bill.id}</title>
-
-            <style>
-
-                body {
-                    font-family: Arial;
-                    padding: 40px;
-                }
-
-                .invoice {
-                    max-width: 600px;
-                    margin: auto;
-                    border: 1px solid #ddd;
-                    padding: 30px;
-                }
-
-                h1 {
-                    color: #1976d2;
-                }
-
-                .row {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 10px 0;
-                    border-bottom: 1px solid #eee;
-                }
-
-            </style>
-
-        </head>
-
-        <body>
-
-            <div class="invoice">
-
-                <h1>CarePoint Hospital</h1>
-
-                <p>
-                    Patient Billing Receipt
-                </p>
-
-                <hr>
-
-                <div class="row">
-                    <strong>Bill ID</strong>
-                    <span>${bill.id}</span>
-                </div>
-
-                <div class="row">
-                    <strong>Patient</strong>
-                    <span>${bill.patient}</span>
-                </div>
-
-                <div class="row">
-                    <strong>Service</strong>
-                    <span>${bill.service}</span>
-                </div>
-
-                <div class="row">
-                    <strong>Amount</strong>
-                    <span>₹${bill.amount}</span>
-                </div>
-
-                <div class="row">
-                    <strong>Status</strong>
-                    <span>${bill.payment}</span>
-                </div>
-
-                <br>
-
-                <p>
-                    Thank you for choosing CarePoint Hospital.
-                </p>
-
-            </div>
-
-            <script>
-                window.print();
-            <\/script>
-
-        </body>
-
-        </html>
-
-    `);
-
-  printWindow.document.close();
-}
-
-/* =====================================================
-   PATIENT DROPDOWNS
-===================================================== */
-
-function populatePatientDropdowns() {
-  const appointmentSelect = document.getElementById("appointmentPatient");
-
-  const billSelect = document.getElementById("billPatient");
-
-  const options = patients
+function renderDash() {
+  $("#dashTable").innerHTML = appts
+    .slice(0, 5)
     .map(
-      (patient) => `
-
-            <option value="${patient.name}">
-                ${patient.name} (${patient.id})
-            </option>
-
-        `,
+      (a) =>
+        `<tr><td>${a.time}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td></tr>`,
     )
     .join("");
-
-  appointmentSelect.innerHTML = options;
-
-  billSelect.innerHTML = options;
 }
-
-/* =====================================================
-   DASHBOARD RENDER
-===================================================== */
-
-function updateDashboard() {
-  document.getElementById("dashboardAppointments").textContent =
-    appointments.filter((a) => a.status !== "Cancelled").length;
-
-  document.getElementById("dashboardPatients").textContent = patients.length;
-
-  renderDashboardAppointments();
-
-  renderDashboardDoctors();
-}
-
-/* =====================================================
-   DASHBOARD APPOINTMENTS
-===================================================== */
-
-function renderDashboardAppointments() {
-  const table = document.getElementById("dashboardAppointmentTable");
-
-  table.innerHTML = "";
-
-  appointments.slice(0, 5).forEach((appointment) => {
-    let statusClass = "status-confirmed";
-
-    if (appointment.status === "Waiting") statusClass = "status-waiting";
-
-    if (appointment.status === "Completed") statusClass = "status-completed";
-
-    table.innerHTML += `
-
-            <tr>
-
-                <td>
-                    ${appointment.time}
-                </td>
-
-                <td>
-
-                    <span class="patient-name">
-                        ${appointment.patient}
-                    </span>
-
-                </td>
-
-                <td>
-                    ${appointment.doctor}
-                </td>
-
-                <td>
-                    ${appointment.department}
-                </td>
-
-                <td>
-
-                    <span class="status ${statusClass}">
-                        ${appointment.status}
-                    </span>
-
-                </td>
-
-            </tr>
-
-        `;
-  });
-}
-
-/* =====================================================
-   DASHBOARD DOCTORS
-===================================================== */
-
-function renderDashboardDoctors() {
-  const container = document.getElementById("dashboardDoctors");
-
-  container.innerHTML = "";
-
-  doctors.slice(0, 4).forEach((doctor) => {
-    const dot = doctor.status === "Available" ? "🟢" : "🟠";
-
-    container.innerHTML += `
-
-            <div class="doctor">
-
-                <div class="doctor-avatar">
-
-                    ${doctor.name
-                      .split(" ")
-                      .slice(-2)
-                      .map((x) => x[0])
-                      .join("")}
-
-                </div>
-
-
-                <div class="doctor-info">
-
-                    <strong>
-                        ${doctor.name}
-                    </strong>
-
-                    <span>
-                        ${doctor.department}
-                    </span>
-
-                </div>
-
-
-                <span style="font-size:9px;">
-                    ${dot}
-                </span>
-
-            </div>
-
-        `;
-  });
-}
-
-/* =====================================================
-   GLOBAL SEARCH
-===================================================== */
-
-document.getElementById("globalSearch").addEventListener("keyup", function (e) {
-  if (e.key === "Enter") {
-    openPage("patients");
-
-    document.getElementById("patientSearch").value = this.value;
-
-    renderPatients();
-  }
-});
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
-
-function showNotifications() {
-  alert(
-    "NOTIFICATIONS\n\n" +
-      "• 3 patients are waiting\n" +
-      "• Dr. Priya Roy is currently busy\n" +
-      "• New appointment booked\n" +
-      "• Payment pending for INV-1002",
+function renderUsers() {
+  let q = $("#uSearch").value.toLowerCase(),
+    role = $("#uRole").value,
+    dept = $("#uDept").value,
+    status = $("#uStatus").value,
+    rows = users.filter(
+      (u) =>
+        u.join(" ").toLowerCase().includes(q) &&
+        (!role || u[2] === role) &&
+        (!dept || u[3] === dept) &&
+        (!status || u[4] === status),
+    );
+  rows.sort(
+    (a, b) =>
+      a[["username", "name", "role"].indexOf(userSort)].localeCompare(
+        b[["username", "name", "role"].indexOf(userSort)],
+      ) * userDir,
   );
+  $("#uCount").textContent =
+    `User directory · ${rows.length} of ${users.length}`;
+  $("#userTable").innerHTML =
+    rows
+      .map(
+        (u) =>
+          `<tr><td>${u[0]}</td><td>${person(u[1])}</td><td>${badge(u[2])}</td><td>${u[3]}</td><td>${badge(u[4])}</td><td><button class="action" onclick="alert('Demo user detail: ${u[0]}')">Edit</button></td></tr>`,
+      )
+      .join("") || `<tr><td colspan="6">No matching users</td></tr>`;
 }
-
-/* =====================================================
-   REPORT
-===================================================== */
-
-function generateReport() {
-  showToast("Report generated successfully!");
+$$("[data-usort]").forEach(
+  (b) =>
+    (b.onclick = () => {
+      let k = b.dataset.usort;
+      userDir = userSort === k ? -userDir : 1;
+      userSort = k;
+      renderUsers();
+    }),
+);
+["uSearch", "uRole", "uDept", "uStatus"].forEach(
+  (id) => ($("#" + id).oninput = renderUsers),
+);
+$("#uClear").onclick = () => {
+  ["uSearch", "uRole", "uDept", "uStatus"].forEach(
+    (i) => ($("#" + i).value = ""),
+  );
+  renderUsers();
+};
+$("#userToggle").onclick = () => $("#userPanel").classList.toggle("open");
+$$("[data-close]").forEach(
+  (b) => (b.onclick = () => $("#" + b.dataset.close).classList.remove("open")),
+);
+$("#userForm").onsubmit = (e) => {
+  e.preventDefault();
+  let d = Object.fromEntries(new FormData(e.target));
+  if (users.some((u) => u[0] === d.username))
+    return alert("Username already exists");
+  users.push([d.username, d.name, d.role, d.department || "General", "Active"]);
+  e.target.reset();
+  $("#userPanel").classList.remove("open");
+  updateCounts();
+  renderUsers();
+};
+function renderAppts() {
+  let q = $("#aSearch").value.toLowerCase(),
+    date = $("#aDate").value,
+    status = $("#aStatus").value,
+    dept = $("#aDept").value,
+    rows = appts.filter(
+      (a) =>
+        `${a.patient} ${a.doctor}`.toLowerCase().includes(q) &&
+        (!date || a.date === date) &&
+        (!status || a.status === status) &&
+        (!dept || a.department === dept),
+    );
+  rows.sort((a, b) => a[apptSort].localeCompare(b[apptSort]) * apptDir);
+  $("#aCount").textContent = `Appointment schedule · ${rows.length} records`;
+  $("#apptTable").innerHTML =
+    rows
+      .map(
+        (a) =>
+          `<tr><td>${a.date} · ${a.time}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td><td>${a.status === "Cancelled" ? "—" : `<button class="action redtext" onclick="cancelAppt('${a.patient}')">Cancel</button>`}</td></tr>`,
+      )
+      .join("") || `<tr><td colspan="6">No appointments found</td></tr>`;
 }
-
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-function saveSettings() {
-  showToast("Settings saved successfully!");
+window.cancelAppt = (n) => {
+  let a = appts.find((a) => a.patient === n);
+  if (a && confirm("Cancel appointment for " + n + "?")) {
+    a.status = "Cancelled";
+    renderAppts();
+    renderQueue();
+  }
+};
+$$("[data-asort]").forEach(
+  (b) =>
+    (b.onclick = () => {
+      let k = b.dataset.asort;
+      apptDir = apptSort === k ? -apptDir : 1;
+      apptSort = k;
+      renderAppts();
+    }),
+);
+["aSearch", "aDate", "aStatus", "aDept"].forEach(
+  (i) => ($("#" + i).oninput = renderAppts),
+);
+$("#aClear").onclick = () => {
+  ["aSearch", "aDate", "aStatus", "aDept"].forEach(
+    (i) => ($("#" + i).value = ""),
+  );
+  renderAppts();
+};
+$("#apptToggle").onclick = () => $("#apptPanel").classList.toggle("open");
+$("#apptForm").onsubmit = (e) => {
+  e.preventDefault();
+  let d = Object.fromEntries(new FormData(e.target));
+  appts.push({ ...d });
+  e.target.reset();
+  $("#apptPanel").classList.remove("open");
+  renderAppts();
+  renderQueue();
+  renderDash();
+};
+function renderQueue() {
+  let q = $("#qSearch").value.toLowerCase(),
+    st = $("#qStatus").value,
+    dp = $("#qDept").value,
+    date = $("#qDate").value,
+    rows = appts
+      .filter(
+        (a) =>
+          `${a.patient} ${a.doctor}`.toLowerCase().includes(q) &&
+          (!st || a.status === st) &&
+          (!dp || a.department === dp) &&
+          (!date || a.date === date),
+      )
+      .sort((a, b) => a.time.localeCompare(b.time));
+  ["Waiting", "Confirmed", "Cancelled"].forEach(
+    (s) =>
+      ($("#q" + s).textContent = appts.filter((a) => a.status === s).length),
+  );
+  $("#queueTable").innerHTML =
+    rows
+      .map(
+        (a, i) =>
+          `<tr><td>${a.time}</td><td>${i + 1}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td></tr>`,
+      )
+      .join("") || `<tr><td colspan="6">Queue empty</td></tr>`;
 }
-
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async function () {
-    if (confirm("Are you sure you want to logout?")) {
-      const response = await fetch("/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      showToast("Logged out successfully.");
-
-      if (response.ok) {
-        window.location.href = "/";
-      }
-    }
-  });
-
-/* =====================================================
-   MOBILE SIDEBAR
-===================================================== */
-
-document.getElementById("mobileMenu").addEventListener("click", function () {
-  document.getElementById("sidebar").classList.toggle("open");
-});
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-let toastTimer;
-
-function showToast(message) {
-  const toast = document.getElementById("toast");
-
-  toast.textContent = message;
-
-  toast.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2500);
+["qSearch", "qStatus", "qDept", "qDate"].forEach(
+  (i) => ($("#" + i).oninput = renderQueue),
+);
+$("#qClear").onclick = () => {
+  ["qSearch", "qStatus", "qDept", "qDate"].forEach(
+    (i) => ($("#" + i).value = ""),
+  );
+  renderQueue();
+};
+$("#refreshQueue").onclick = renderQueue;
+function renderBills() {
+  let q = $("#bSearch").value.toLowerCase(),
+    st = $("#bStatus").value,
+    date = $("#bDate").value,
+    svc = $("#bService").value,
+    rows = bills.filter(
+      (b) =>
+        `${b.patient} ${b.service}`.toLowerCase().includes(q) &&
+        (!st || b.status === st) &&
+        (!date || b.date === date) &&
+        (!svc || b.service === svc),
+    );
+  $("#billTotal").textContent = money(bills.reduce((s, b) => s + b.amount, 0));
+  $("#billPaid").textContent = money(
+    bills.filter((b) => b.status === "Paid").reduce((s, b) => s + b.amount, 0),
+  );
+  $("#billDue").textContent = money(
+    bills
+      .filter((b) => b.status === "Pending")
+      .reduce((s, b) => s + b.amount, 0),
+  );
+  $("#billCount").textContent = bills.length;
+  $("#bCount").textContent = `Patient bills · ${rows.length} records`;
+  $("#billTable").innerHTML =
+    rows
+      .map(
+        (b) =>
+          `<tr><td>${person(b.patient)}</td><td>${b.service}</td><td><b>${money(b.amount)}</b></td><td>${b.date}</td><td>${badge(b.status)}</td><td>${b.status === "Pending" ? `<button class="action" onclick="payBill(${bills.indexOf(b)})">Pay</button>` : ""}<button class="action" onclick="receipt(${bills.indexOf(b)})">Print receipt</button></td></tr>`,
+      )
+      .join("") || `<tr><td colspan="6">No bills found</td></tr>`;
 }
-
-/* =====================================================
-   INITIALIZE
-===================================================== */
-
-renderPatients();
-
-renderAppointments();
-
-renderDoctors();
-
+window.payBill = (i) => {
+  bills[i].status = "Paid";
+  renderBills();
+  alert("Payment recorded in demo");
+};
+window.receipt = (i) => {
+  let b = bills[i],
+    w = window.open("", "receipt", "width=500,height=600");
+  if (!w) return;
+  w.document.write(
+    `<h2>Northstar Hospital Receipt</h2><p>Patient: ${b.patient}</p><p>Service: ${b.service}</p><p>Amount: ${money(b.amount)}</p><p>Date: ${b.date}</p><p>Status: ${b.status}</p>`,
+  );
+  w.document.close();
+  w.print();
+};
+["bSearch", "bStatus", "bDate", "bService"].forEach(
+  (i) => ($("#" + i).oninput = renderBills),
+);
+$("#bClear").onclick = () => {
+  ["bSearch", "bStatus", "bDate", "bService"].forEach(
+    (i) => ($("#" + i).value = ""),
+  );
+  renderBills();
+};
+$("#addBill").onclick = () => {
+  let patient = prompt("Patient name");
+  if (!patient) return;
+  let service = prompt("Service name", "Consultation");
+  let amount = Number(prompt("Amount in INR", "1000"));
+  if (service && amount > 0) {
+    bills.push({
+      patient,
+      service,
+      amount,
+      date: today,
+      status: "Pending",
+    });
+    renderBills();
+  }
+};
+function exportCsv(rows, name) {
+  let csv = rows
+      .map((r) =>
+        r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\r\n"),
+    blob = new Blob([csv], { type: "text/csv" }),
+    url = URL.createObjectURL(blob),
+    a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+$("#billExport").onclick = () =>
+  exportCsv(
+    [
+      ["Patient", "Service", "Amount", "Date", "Status"],
+      ...bills.map((b) => [b.patient, b.service, b.amount, b.date, b.status]),
+    ],
+    "hms-bills.csv",
+  );
+$("#reportExport").onclick = () =>
+  exportCsv(
+    [
+      ["Metric", "Value"],
+      ["Patients today", 126],
+      [
+        "Upcoming appointments",
+        appts.filter((a) => !["Cancelled", "Completed"].includes(a.status))
+          .length,
+      ],
+      [
+        "Completed visits",
+        appts.filter((a) => a.status === "Completed").length,
+      ],
+      [
+        "Daily revenue",
+        bills
+          .filter((b) => b.status === "Paid")
+          .reduce((s, b) => s + b.amount, 0),
+      ],
+      ["Outflow", 36200],
+    ],
+    "hms-report.csv",
+  );
+$("#period").onchange = (e) => {
+  let p = e.target.value,
+    m = p === "Today" ? 1 : p === "This week" ? 6 : 27;
+  $("#rPatients").textContent = 126 * m;
+  $("#rUpcoming").textContent = 34 * m;
+  $("#rCompleted").textContent = 82 * m;
+  $("#rRevenue").textContent = money(84250 * m);
+};
+$("#globalSearch").oninput = (e) => {
+  let p = $(".view.active").id,
+    v = e.target.value;
+  if (p === "users") (($("#uSearch").value = v), renderUsers());
+  if (p === "appointments") (($("#aSearch").value = v), renderAppts());
+  if (p === "queue") (($("#qSearch").value = v), renderQueue());
+  if (p === "billing") (($("#bSearch").value = v), renderBills());
+};
+$("#profileForm").onsubmit = (e) => {
+  e.preventDefault();
+  $("#topName").textContent = $("#pUsername").value;
+  $("#profileNotice").textContent = "Profile changes saved in this demo.";
+  $("#profileNotice").classList.add("show");
+};
+$("#photoInput").onchange = (e) => {
+  let f = e.target.files[0];
+  if (f) {
+    photo = URL.createObjectURL(f);
+    $("#topPhoto").src = photo;
+    $("#photoPreview").src = photo;
+  }
+};
+$("#profileForm").onreset = () =>
+  setTimeout(() => {
+    $("#topPhoto").src = photo;
+    $("#photoPreview").src = photo;
+  }, 0);
+const profile = {
+  pUsername: "Olivia Martin",
+  pEmail: "olivia.martin@northstar.example",
+  pFirst: "Olivia",
+  pMiddle: "Rose",
+  pLast: "Martin",
+  pPhone: "+1 555 0184",
+  pAddress: "24 Wellness Avenue, Springfield",
+  pAge: "34",
+  pDob: "1992-04-18",
+  pGender: "Female",
+};
+Object.entries(profile).forEach(([id, val]) => ($("#" + id).value = val));
+updateCounts();
+renderDash();
+renderUsers();
+renderAppts();
 renderQueue();
-
 renderBills();
-
-updateDashboard();
-
-populatePatientDropdowns();

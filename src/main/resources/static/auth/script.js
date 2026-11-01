@@ -1,30 +1,43 @@
-const loginFormError = document.getElementById("login-form-error-id"),
-  registerFormError = document.getElementById("register-form-error-id"),
-  loginForm = document.getElementById("login-form-id"),
-  registerForm = document.getElementById("register-form-id"),
-  loginSection = document.getElementById("login-section-id"),
-  registerSection = document.getElementById("register-section-id");
+const tabs = [...document.querySelectorAll(".tab")];
+const sections = [...document.querySelectorAll(".form-section")];
 
-function showRegister() {
-  registerForm.reset();
-  registerFormError.textContent = "";
-  loginSection.style.display = "none";
-  registerSection.style.display = "block";
+function showSection(name) {
+  tabs.forEach((tab) => {
+    const active = tab.id === `${name}-tab`;
+    tab.setAttribute("aria-selected", String(active));
+  });
+  sections.forEach((section) =>
+    section.classList.toggle("active", section.id === `${name}-section`),
+  );
+  document.getElementById(`${name}-username`).focus({ preventScroll: true });
 }
 
-function showLogin() {
-  loginForm.reset();
-  loginFormError.textContent = "";
-  registerSection.style.display = "none";
-  loginSection.style.display = "block";
-}
+tabs.forEach((tab) =>
+  tab.addEventListener("click", () => showSection(tab.id.replace("-tab", ""))),
+);
 
-async function loginUser(e) {
+document.querySelectorAll("[data-switch]").forEach((link) => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    showSection(link.dataset.switch);
+  });
+});
+
+document.querySelectorAll("[data-toggle]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById(button.dataset.toggle);
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    button.textContent = visible ? "Hide" : "Show";
+  });
+});
+
+document.getElementById("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(e.currentTarget);
+  const messageElement = document.getElementById("login-message");
 
-  const username = formData.get("username");
+  const formData = new FormData(e.currentTarget);
 
   const response = await fetch("/login", {
     method: "POST",
@@ -34,7 +47,7 @@ async function loginUser(e) {
     },
 
     body: JSON.stringify({
-      username: username,
+      username: formData.get("username"),
       password: formData.get("password"),
     }),
   });
@@ -44,50 +57,66 @@ async function loginUser(e) {
   const data = await response.json();
 
   if (data.success) {
-    loginFormError.textContent = "";
+    messageElement.textContent = "";
     window.location.href = "/dashboard";
-  } else loginFormError.textContent = data.message;
-}
+  } else messageElement.textContent = data.message;
 
-async function registerUser(e) {
-  e.preventDefault();
+  //   messageElement.textContent =
+  //     "Demo form submitted. Connect this form to your authentication backend.";
+});
 
-  const formData = new FormData(e.currentTarget);
+document
+  .getElementById("register-form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const username = formData.get("username"),
-    password = formData.get("password"),
-    confirmPassword = formData.get("confirmPassword");
+    const messageElement = document.getElementById("register-message");
 
-  if (password === confirmPassword) {
-    const response = await fetch("/register", {
-      method: "POST",
+    const formData = new FormData(e.currentTarget);
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const password = formData.get("password"),
+      confirmPassword = formData.get("confirmPassword");
 
-      body: JSON.stringify({
-        username: username,
-        password: password,
-        firstName: formData.get("firstName"),
-        middleName: formData.get("middleName"),
-        lastName: formData.get("lastName"),
-        bloodGroup: formData.get("bloodGroup"),
-        dateOfBirth: formData.get("dateOfBirth"),
-        gender: formData.get("gender"),
-        phoneNumber: formData.get("phoneNumber"),
-      }),
-    });
+    if (password === confirmPassword) {
+      let response = await fetch("/register", {
+        method: "POST",
 
-    if (!response.ok) return;
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-    const data = await response.json();
+        body: JSON.stringify({
+          username: formData.get("username"),
+          password: password,
+        }),
+      });
 
-    if (data.success) {
-      registerFormError.textContent = "";
-      showLogin();
-    } else registerFormError.textContent = data.message;
-  } else
-    registerFormError.textContent =
-      "Passwords do not match. Please recheck and try again...";
-}
+      if (!response.ok) return;
+
+      let data = await response.json();
+
+      if (data.success) {
+        messageElement.textContent = "";
+        showSection("login");
+      } else messageElement.textContent = data.message;
+    } else
+      messageElement.textContent = "Passwords do not match. Please recheck and try again...";
+    //   const username = document.getElementById("register-username").value;
+    //   const password = document.getElementById("register-password").value;
+    //   const confirmPassword = document.getElementById("confirm-password").value;
+    //   if (password !== confirmPassword) {
+    //     setMessage(true, "Passwords do not match.");
+    //     document.getElementById("confirm-password").focus();
+    //     return;
+    //   }
+
+    //   messageElement.style.color = "#31805c";
+    //   messageElement.textContent =
+    //     "Demo registration submitted. Connect this form to your account backend.";
+  });
+
+// document.getElementById("forgot-link").addEventListener("click", (event) => {
+//   event.preventDefault();
+//   document.getElementById("login-message").textContent =
+//     "Password reset flow can be connected here.";
+// });
