@@ -11,21 +11,33 @@ public class ProfileService {
 
     private final ProfileRepository profileRepo;
 
-    public ProfileService(ProfileRepository repo) {
+    public ProfileService(ProfileRepository profileRepo) {
 
-        this.profileRepo = repo;
+        this.profileRepo = profileRepo;
+
+    }
+
+    public Profile getProfile(Long accId) {
+
+        return profileRepo.findByAccountId(accId).get();
 
     }
 
     public Profile getProfile(Account acc) {
 
-        return this.profileRepo.findByAccountId(acc.getId()).get();
+        return getProfile(acc.getId());
 
     }
 
     public Profile saveProfile(Profile profile) {
 
-        return this.profileRepo.save(profile);
+        return profileRepo.save(profile);
+
+    }
+
+    public void deleteProfile(Profile profile) {
+
+        profileRepo.delete(profile);
 
     }
 

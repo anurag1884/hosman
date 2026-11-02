@@ -1,422 +1,887 @@
-const $ = (s) => document.querySelector(s),
-  $$ = (s) => [...document.querySelectorAll(s)],
-  today = new Date().toISOString().slice(0, 10);
-let users = [
-  ["olivia.m", "Olivia Martin", "Admin", "General", "Active"],
-  ["amelia.chen", "Dr. Amelia Chen", "Doctor", "Cardiology", "Active"],
-  ["noah.w", "Dr. Noah Williams", "Doctor", "Neurology", "Active"],
-  ["priya.sharma", "Dr. Priya Sharma", "Doctor", "Orthopedics", "Active"],
-  ["ethan.p", "Dr. Ethan Patel", "Doctor", "Pediatrics", "Active"],
-  ["mia.johnson", "Mia Johnson", "Nurse", "Cardiology", "Active"],
-  ["sophia.d", "Sophia Davis", "Nurse", "General", "Active"],
-  ["james.w", "James Wilson", "Receptionist", "General", "Active"],
-  ["ava.brown", "Ava Brown", "Receptionist", "General", "Inactive"],
-  ["patient.lee", "Daniel Lee", "Patient", "General", "Active"],
-  ["patient.khan", "Sara Khan", "Patient", "General", "Active"],
-  ["admin.r", "Robert Green", "Admin", "General", "Active"],
-];
-let appts = [
-  ["09:00", "Daniel Lee", "Dr. Amelia Chen", "Cardiology", "Confirmed"],
-  ["09:30", "Sara Khan", "Dr. Noah Williams", "Neurology", "Waiting"],
-  ["10:00", "Michael Turner", "Dr. Priya Sharma", "Orthopedics", "Confirmed"],
-  ["10:30", "Emma Wilson", "Dr. Ethan Patel", "Pediatrics", "Completed"],
-  ["11:00", "Lucas Martin", "Dr. Amelia Chen", "Cardiology", "Waiting"],
-  ["11:30", "Isabella Clark", "Dr. Noah Williams", "Neurology", "Cancelled"],
-  ["12:00", "Oliver White", "Dr. Priya Sharma", "Orthopedics", "Confirmed"],
-  ["13:00", "Sophia Moore", "Dr. Ethan Patel", "Pediatrics", "Confirmed"],
-].map((a) => ({
-  time: a[0],
-  patient: a[1],
-  doctor: a[2],
-  department: a[3],
-  status: a[4],
-  date: today,
-}));
-let bills = [
-  ["Daniel Lee", "Consultation", 1200, "Paid"],
-  ["Sara Khan", "Therapy", 2400, "Pending"],
-  ["Michael Turner", "Lab test", 850, "Paid"],
-  ["Emma Wilson", "Imaging", 3200, "Pending"],
-  ["Lucas Martin", "Consultation", 1000, "Paid"],
-].map((a) => ({
-  patient: a[0],
-  service: a[1],
-  amount: a[2],
-  status: a[3],
-  date: today,
-}));
-let userSort = "username",
-  userDir = 1,
-  apptSort = "time",
-  apptDir = 1,
-  photo = $("#topPhoto").src;
-function badge(s) {
-  return `<span class="badge ${["Paid", "Completed", "Active"].includes(s) ? "green" : ["Waiting", "Pending"].includes(s) ? "amber" : ["Cancelled", "Inactive"].includes(s) ? "red" : ""}">${s}</span>`;
+/**
+ * Central Application State Store
+ */
+const hospitalSystemState = {
+  currentLoggedInUserProfile: null,
+
+  accountsList: [
+    // { username: "dr.arjun.mehta", role: "Admin" },
+    // { username: "admin.vikram.sen", role: "Admin" },
+    // { username: "dr.kavita.nair", role: "Doctor" },
+    // { username: "dr.siddharth.roy", role: "Doctor" },
+    // { username: "dr.farhan.akhtar", role: "Doctor" },
+    // { username: "nurse.elena.das", role: "Nurse" },
+    // { username: "nurse.soma.ghosh", role: "Nurse" },
+    // { username: "nurse.david.ross", role: "Nurse" },
+    // { username: "desk.riya.kapoor", role: "Receptionist" },
+    // { username: "desk.amit.bose", role: "Receptionist" },
+    // { username: "patient.rohan.verma", role: "Patient" },
+    // { username: "patient.ananya.chatterjee", role: "Patient" },
+    // { username: "patient.meera.iyer", role: "Patient" },
+    // { username: "patient.kabir.khan", role: "Patient" },
+  ],
+
+  appointmentsList: [
+    // {
+    //   id: "APT-101",
+    //   time: "09:00",
+    //   patientName: "Rohan Verma",
+    //   doctorName: "Dr. Kavita Nair",
+    //   department: "Cardiology",
+    //   status: "Confirmed",
+    // },
+    // {
+    //   id: "APT-102",
+    //   time: "09:30",
+    //   patientName: "Ananya Chatterjee",
+    //   doctorName: "Dr. Siddharth Roy",
+    //   department: "Neurology",
+    //   status: "Waiting",
+    // },
+    // {
+    //   id: "APT-103",
+    //   time: "10:15",
+    //   patientName: "Meera Iyer",
+    //   doctorName: "Dr. Farhan Akhtar",
+    //   department: "Orthopedics",
+    //   status: "Waiting",
+    // },
+    // {
+    //   id: "APT-104",
+    //   time: "11:00",
+    //   patientName: "Kabir Khan",
+    //   doctorName: "Dr. Kavita Nair",
+    //   department: "Cardiology",
+    //   status: "Confirmed",
+    // },
+    // {
+    //   id: "APT-105",
+    //   time: "11:45",
+    //   patientName: "Suresh Menon",
+    //   doctorName: "Dr. Siddharth Roy",
+    //   department: "General Medicine",
+    //   status: "Cancelled",
+    // },
+  ],
+
+  billsList: [
+    // {
+    //   id: "INV-5001",
+    //   patientName: "Rohan Verma",
+    //   serviceName: "Consultation",
+    //   paymentAmount: 120.0,
+    //   date: "2026-11-01",
+    //   isPaid: true,
+    // },
+    // {
+    //   id: "INV-5002",
+    //   patientName: "Ananya Chatterjee",
+    //   serviceName: "MRI / Radiology Scan",
+    //   paymentAmount: 450.0,
+    //   date: "2026-11-01",
+    //   isPaid: false,
+    // },
+    // {
+    //   id: "INV-5003",
+    //   patientName: "Meera Iyer",
+    //   serviceName: "Physical Therapy",
+    //   paymentAmount: 85.0,
+    //   date: "2026-11-01",
+    //   isPaid: true,
+    // },
+    // {
+    //   id: "INV-5004",
+    //   patientName: "Kabir Khan",
+    //   serviceName: "Diagnostic Lab Panel",
+    //   paymentAmount: 210.0,
+    //   date: "2026-11-01",
+    //   isPaid: false,
+    // },
+  ],
+
+  sortingConfiguration: {
+    users: { column: "username", direction: "asc" },
+    appointments: { column: "time", direction: "asc" },
+    opd: { column: "time", direction: "asc" },
+  },
+};
+
+/* ========================================================================
+       UTILITY HELPERS
+       ======================================================================== */
+async function sendRequest(url, request) {
+  const response = await fetch(url, request);
+  if (!response.ok) return null;
+  return await response.json();
 }
-function person(n) {
-  return `<b>${n}</b>`;
+
+function showToastNotification(messageText) {
+  const toastBanner = document.getElementById("toast-notification");
+  toastBanner.textContent = messageText;
+  toastBanner.style.display = "block";
+  clearTimeout(toastBanner.hideTimer);
+  toastBanner.hideTimer = setTimeout(() => {
+    toastBanner.style.display = "none";
+  }, 3200);
 }
-function money(n) {
-  return "₹" + n.toLocaleString("en-IN");
+
+function getStatusBadgeClassName(statusText) {
+  const normalized = statusText.toLowerCase();
+  if (normalized === "confirmed" || normalized === "paid")
+    return "status-confirmed";
+  if (normalized === "waiting" || normalized === "unpaid")
+    return "status-waiting";
+  return "status-cancelled";
 }
-function go(p) {
-  $$(".view").forEach((v) => v.classList.toggle("active", v.id === p));
-  $$(".nav button").forEach((b) =>
-    b.classList.toggle("active", b.dataset.page === p),
+
+function directionalLexicographicSorting(
+  itemA,
+  itemB,
+  columnKey,
+  sortDirection,
+) {
+  const valueA = String(itemA[columnKey] ?? "").toLowerCase();
+  const valueB = String(itemB[columnKey] ?? "").toLowerCase();
+  if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+  if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+  return 0;
+}
+
+/* ========================================================================
+       1. RENDER DASHBOARD ROLE COUNTS
+       ======================================================================== */
+function renderDashboardRoleStatistics() {
+  const roleCategories = [
+    {
+      roleKey: "Admin",
+      label: "Administrators",
+      description: "System & operations control",
+    },
+    {
+      roleKey: "Patient",
+      label: "Registered Patients",
+      description: "Active care records",
+    },
+    {
+      roleKey: "Doctor",
+      label: "Doctors & Surgeons",
+      description: "Attending specialists",
+    },
+    {
+      roleKey: "Nurse",
+      label: "Nursing Staff",
+      description: "Ward & triage care",
+    },
+    {
+      roleKey: "Receptionist",
+      label: "Receptionists",
+      description: "Front-desk & scheduling",
+    },
+  ];
+  const dashboardStatsContainer = document.getElementById(
+    "dashboard-role-stats-grid",
   );
-  $("#sidebar").classList.remove("open");
-  $("#dropdown").classList.remove("open");
-  if (p === "users") renderUsers();
-  if (p === "appointments") renderAppts();
-  if (p === "queue") renderQueue();
-  if (p === "billing") renderBills();
+  dashboardStatsContainer.innerHTML = roleCategories
+    .map((category) => {
+      const matchingRoleCount = hospitalSystemState.accountsList.filter(
+        (user) => user.role === category.roleKey,
+      ).length;
+
+      return `
+          <article class="stat-card">
+            <span class="stat-card-label">${category.label}</span>
+            <span class="stat-card-value">${matchingRoleCount}</span>
+            <span class="stat-card-trend">${category.description}</span>
+          </article>
+        `;
+    })
+    .join("");
 }
-$$("[data-page]").forEach((b) => (b.onclick = () => go(b.dataset.page)));
-$("#mobile").onclick = () => $("#sidebar").classList.toggle("open");
-$("#profileBtn").onclick = () => $("#dropdown").classList.toggle("open");
-$("#logout").onclick = () =>
-  confirm("Log out of Northstar HMS?") &&
-  alert("Demo logout. Connect this action to authentication.");
-function updateCounts() {
-  let roles = ["Patient", "Doctor", "Nurse", "Admin", "Receptionist"];
-  roles.forEach(
-    (r) =>
-      ($("#count" + r).textContent = users.filter((u) => u[2] === r).length),
-  );
-}
-function renderDash() {
-  $("#dashTable").innerHTML = appts
-    .slice(0, 5)
+
+/* ========================================================================
+       2. RENDER USERS TABLE (With Filtering & Sorting)
+       ======================================================================== */
+function renderAccountsTable() {
+  const usernameSearchQuery = document
+    .getElementById("user-search-filter")
+    .value.trim()
+    .toLowerCase();
+  const selectedRoleFilter = document.getElementById("user-role-filter").value;
+  const { column, direction } = hospitalSystemState.sortingConfiguration.users;
+
+  const filteredAndSortedUsers = hospitalSystemState.accountsList
+    .filter((user) => {
+      const matchesUsername = user.username
+        .toLowerCase()
+        .includes(usernameSearchQuery);
+      const matchesRole =
+        selectedRoleFilter === "ALL" || user.role === selectedRoleFilter;
+      return matchesUsername && matchesRole;
+    })
+    .sort((a, b) => directionalLexicographicSorting(a, b, column, direction));
+
+  const accountsTableBody = document.getElementById("users-table-body");
+  accountsTableBody.innerHTML = filteredAndSortedUsers
     .map(
-      (a) =>
-        `<tr><td>${a.time}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td></tr>`,
+      (user) => `
+        <tr>
+          <td class="col-expanded"><strong>${user.username}</strong></td>
+          <td><span class="status-badge status-confirmed">${user.role}</span></td>
+        </tr>
+      `,
     )
     .join("");
 }
-function renderUsers() {
-  let q = $("#uSearch").value.toLowerCase(),
-    role = $("#uRole").value,
-    dept = $("#uDept").value,
-    status = $("#uStatus").value,
-    rows = users.filter(
-      (u) =>
-        u.join(" ").toLowerCase().includes(q) &&
-        (!role || u[2] === role) &&
-        (!dept || u[3] === dept) &&
-        (!status || u[4] === status),
-    );
-  rows.sort(
-    (a, b) =>
-      a[["username", "name", "role"].indexOf(userSort)].localeCompare(
-        b[["username", "name", "role"].indexOf(userSort)],
-      ) * userDir,
+
+/* ========================================================================
+       3. RENDER APPOINTMENTS TABLE (With Filtering, Sorting, & Cancel Action)
+       ======================================================================== */
+function renderAppointmentsTable() {
+  const searchKeyword = document
+    .getElementById("appointment-search-filter")
+    .value.trim()
+    .toLowerCase();
+  const selectedDepartment = document.getElementById(
+    "appointment-department-filter",
+  ).value;
+  const selectedStatus = document.getElementById(
+    "appointment-status-filter",
+  ).value;
+  const { column, direction } =
+    hospitalSystemState.sortingConfiguration.appointments;
+
+  const filteredAppointments = hospitalSystemState.appointmentsList
+    .filter((appointment) => {
+      const matchesSearch =
+        appointment.patientName.toLowerCase().includes(searchKeyword) ||
+        appointment.doctorName.toLowerCase().includes(searchKeyword);
+      const matchesDepartment =
+        selectedDepartment === "ALL" ||
+        appointment.department === selectedDepartment;
+      const matchesStatus =
+        selectedStatus === "ALL" || appointment.status === selectedStatus;
+      return matchesSearch && matchesDepartment && matchesStatus;
+    })
+    .sort((a, b) => directionalLexicographicSorting(a, b, column, direction));
+
+  const appointmentsTableBody = document.getElementById(
+    "appointments-table-body",
   );
-  $("#uCount").textContent =
-    `User directory · ${rows.length} of ${users.length}`;
-  $("#userTable").innerHTML =
-    rows
-      .map(
-        (u) =>
-          `<tr><td>${u[0]}</td><td>${person(u[1])}</td><td>${badge(u[2])}</td><td>${u[3]}</td><td>${badge(u[4])}</td><td><button class="action" onclick="alert('Demo user detail: ${u[0]}')">Edit</button></td></tr>`,
-      )
-      .join("") || `<tr><td colspan="6">No matching users</td></tr>`;
+  appointmentsTableBody.innerHTML = filteredAppointments
+    .map((appointment) => {
+      const isAlreadyCancelled = appointment.status === "Cancelled";
+      return `
+          <tr>
+            <td><strong>${appointment.time}</strong></td>
+            <td>${appointment.patientName}</td>
+            <td>${appointment.doctorName}</td>
+            <td>${appointment.department}</td>
+            <td>
+              <span class="status-badge ${getStatusBadgeClassName(appointment.status)}">
+                ${appointment.status}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-danger-outline"
+                onclick="handleCancelAppointment('${appointment.id}')"
+                ${isAlreadyCancelled ? "disabled" : ""}
+              >
+                ${isAlreadyCancelled ? "Cancelled" : "Cancel"}
+              </button>
+            </td>
+          </tr>
+        `;
+    })
+    .join("");
 }
-$$("[data-usort]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      let k = b.dataset.usort;
-      userDir = userSort === k ? -userDir : 1;
-      userSort = k;
-      renderUsers();
-    }),
-);
-["uSearch", "uRole", "uDept", "uStatus"].forEach(
-  (id) => ($("#" + id).oninput = renderUsers),
-);
-$("#uClear").onclick = () => {
-  ["uSearch", "uRole", "uDept", "uStatus"].forEach(
-    (i) => ($("#" + i).value = ""),
+
+function handleCancelAppointment(appointmentId) {
+  const targetAppointment = hospitalSystemState.appointmentsList.find(
+    (apt) => apt.id === appointmentId,
   );
-  renderUsers();
-};
-$("#userToggle").onclick = () => $("#userPanel").classList.toggle("open");
-$$("[data-close]").forEach(
-  (b) => (b.onclick = () => $("#" + b.dataset.close).classList.remove("open")),
-);
-$("#userForm").onsubmit = (e) => {
-  e.preventDefault();
-  let d = Object.fromEntries(new FormData(e.target));
-  if (users.some((u) => u[0] === d.username))
-    return alert("Username already exists");
-  users.push([d.username, d.name, d.role, d.department || "General", "Active"]);
-  e.target.reset();
-  $("#userPanel").classList.remove("open");
-  updateCounts();
-  renderUsers();
-};
-function renderAppts() {
-  let q = $("#aSearch").value.toLowerCase(),
-    date = $("#aDate").value,
-    status = $("#aStatus").value,
-    dept = $("#aDept").value,
-    rows = appts.filter(
-      (a) =>
-        `${a.patient} ${a.doctor}`.toLowerCase().includes(q) &&
-        (!date || a.date === date) &&
-        (!status || a.status === status) &&
-        (!dept || a.department === dept),
+  if (targetAppointment && targetAppointment.status !== "Cancelled") {
+    targetAppointment.status = "Cancelled";
+    renderAllViews();
+    showToastNotification(
+      `Appointment for ${targetAppointment.patientName} has been cancelled.`,
     );
-  rows.sort((a, b) => a[apptSort].localeCompare(b[apptSort]) * apptDir);
-  $("#aCount").textContent = `Appointment schedule · ${rows.length} records`;
-  $("#apptTable").innerHTML =
-    rows
-      .map(
-        (a) =>
-          `<tr><td>${a.date} · ${a.time}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td><td>${a.status === "Cancelled" ? "—" : `<button class="action redtext" onclick="cancelAppt('${a.patient}')">Cancel</button>`}</td></tr>`,
-      )
-      .join("") || `<tr><td colspan="6">No appointments found</td></tr>`;
-}
-window.cancelAppt = (n) => {
-  let a = appts.find((a) => a.patient === n);
-  if (a && confirm("Cancel appointment for " + n + "?")) {
-    a.status = "Cancelled";
-    renderAppts();
-    renderQueue();
   }
-};
-$$("[data-asort]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      let k = b.dataset.asort;
-      apptDir = apptSort === k ? -apptDir : 1;
-      apptSort = k;
-      renderAppts();
-    }),
-);
-["aSearch", "aDate", "aStatus", "aDept"].forEach(
-  (i) => ($("#" + i).oninput = renderAppts),
-);
-$("#aClear").onclick = () => {
-  ["aSearch", "aDate", "aStatus", "aDept"].forEach(
-    (i) => ($("#" + i).value = ""),
-  );
-  renderAppts();
-};
-$("#apptToggle").onclick = () => $("#apptPanel").classList.toggle("open");
-$("#apptForm").onsubmit = (e) => {
-  e.preventDefault();
-  let d = Object.fromEntries(new FormData(e.target));
-  appts.push({ ...d });
-  e.target.reset();
-  $("#apptPanel").classList.remove("open");
-  renderAppts();
-  renderQueue();
-  renderDash();
-};
-function renderQueue() {
-  let q = $("#qSearch").value.toLowerCase(),
-    st = $("#qStatus").value,
-    dp = $("#qDept").value,
-    date = $("#qDate").value,
-    rows = appts
-      .filter(
-        (a) =>
-          `${a.patient} ${a.doctor}`.toLowerCase().includes(q) &&
-          (!st || a.status === st) &&
-          (!dp || a.department === dp) &&
-          (!date || a.date === date),
-      )
-      .sort((a, b) => a.time.localeCompare(b.time));
-  ["Waiting", "Confirmed", "Cancelled"].forEach(
-    (s) =>
-      ($("#q" + s).textContent = appts.filter((a) => a.status === s).length),
-  );
-  $("#queueTable").innerHTML =
-    rows
-      .map(
-        (a, i) =>
-          `<tr><td>${a.time}</td><td>${i + 1}</td><td>${person(a.patient)}</td><td>${a.doctor}</td><td>${a.department}</td><td>${badge(a.status)}</td></tr>`,
-      )
-      .join("") || `<tr><td colspan="6">Queue empty</td></tr>`;
 }
-["qSearch", "qStatus", "qDept", "qDate"].forEach(
-  (i) => ($("#" + i).oninput = renderQueue),
-);
-$("#qClear").onclick = () => {
-  ["qSearch", "qStatus", "qDept", "qDate"].forEach(
-    (i) => ($("#" + i).value = ""),
+
+/* ========================================================================
+       4. RENDER OPD QUEUE TABLE (Sorted by Timings and Status)
+       ======================================================================== */
+function renderOpdQueueTable() {
+  const selectedOpdStatus = document.getElementById(
+    "opd-status-priority-filter",
+  ).value;
+  const { column, direction } = hospitalSystemState.sortingConfiguration.opd;
+
+  const sortedQueueList = hospitalSystemState.appointmentsList
+    .filter(
+      (apt) => selectedOpdStatus === "ALL" || apt.status === selectedOpdStatus,
+    )
+    .sort((a, b) => directionalLexicographicSorting(a, b, column, direction));
+
+  const opdTableBody = document.getElementById("opd-queue-table-body");
+  opdTableBody.innerHTML = sortedQueueList
+    .map(
+      (item) => `
+        <tr>
+          <td><strong>${item.time}</strong></td>
+          <td>${item.patientName}</td>
+          <td>${item.doctorName}</td>
+          <td>${item.department}</td>
+          <td>
+            <span class="status-badge ${getStatusBadgeClassName(item.status)}">
+              ${item.status}
+            </span>
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+/* ========================================================================
+       5. RENDER BILLING TABLE (Pay Amount & Print Receipt Actions)
+       ======================================================================== */
+function renderBillingTable() {
+  const patientQuery = document
+    .getElementById("bill-patient-search-filter")
+    .value.trim()
+    .toLowerCase();
+  const serviceFilter = document.getElementById("bill-service-filter").value;
+  const paymentStatusFilter = document.getElementById(
+    "bill-payment-status-filter",
+  ).value;
+
+  const filteredBills = hospitalSystemState.billsList.filter((bill) => {
+    const matchesPatient = bill.patientName
+      .toLowerCase()
+      .includes(patientQuery);
+    const matchesService =
+      serviceFilter === "ALL" || bill.serviceName === serviceFilter;
+    const derivedStatus = bill.isPaid ? "Paid" : "Unpaid";
+    const matchesPaymentStatus =
+      paymentStatusFilter === "ALL" || derivedStatus === paymentStatusFilter;
+    return matchesPatient && matchesService && matchesPaymentStatus;
+  });
+
+  const billingTableBody = document.getElementById("billing-table-body");
+  billingTableBody.innerHTML = filteredBills
+    .map((bill) => {
+      const statusText = bill.isPaid ? "Paid" : "Unpaid";
+      return `
+          <tr>
+            <td><strong>${bill.patientName}</strong></td>
+            <td>${bill.serviceName}</td>
+            <td>$${bill.paymentAmount.toFixed(2)}</td>
+            <td>${bill.date}</td>
+            <td>
+              <span class="status-badge ${getStatusBadgeClassName(statusText)}">
+                ${statusText}
+              </span>
+            </td>
+            <td style="display: flex; gap: 8px;">
+              <button
+                class="btn btn-primary btn-sm"
+                onclick="handlePayBillAmount('${bill.id}')"
+                ${bill.isPaid ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ""}
+              >
+                ${bill.isPaid ? "Paid" : "Pay Amount"}
+              </button>
+              <button
+                class="btn btn-secondary btn-sm"
+                onclick="handlePrintBillReceipt('${bill.id}')"
+              >
+                Print Receipt
+              </button>
+            </td>
+          </tr>
+        `;
+    })
+    .join("");
+}
+
+function handlePayBillAmount(billId) {
+  const targetBill = hospitalSystemState.billsList.find(
+    (bill) => bill.id === billId,
   );
-  renderQueue();
-};
-$("#refreshQueue").onclick = renderQueue;
-function renderBills() {
-  let q = $("#bSearch").value.toLowerCase(),
-    st = $("#bStatus").value,
-    date = $("#bDate").value,
-    svc = $("#bService").value,
-    rows = bills.filter(
-      (b) =>
-        `${b.patient} ${b.service}`.toLowerCase().includes(q) &&
-        (!st || b.status === st) &&
-        (!date || b.date === date) &&
-        (!svc || b.service === svc),
+  if (targetBill && !targetBill.isPaid) {
+    targetBill.isPaid = true;
+    renderAllViews();
+    showToastNotification(
+      `Payment of $${targetBill.paymentAmount.toFixed(2)} received from ${targetBill.patientName}.`,
     );
-  $("#billTotal").textContent = money(bills.reduce((s, b) => s + b.amount, 0));
-  $("#billPaid").textContent = money(
-    bills.filter((b) => b.status === "Paid").reduce((s, b) => s + b.amount, 0),
-  );
-  $("#billDue").textContent = money(
-    bills
-      .filter((b) => b.status === "Pending")
-      .reduce((s, b) => s + b.amount, 0),
-  );
-  $("#billCount").textContent = bills.length;
-  $("#bCount").textContent = `Patient bills · ${rows.length} records`;
-  $("#billTable").innerHTML =
-    rows
-      .map(
-        (b) =>
-          `<tr><td>${person(b.patient)}</td><td>${b.service}</td><td><b>${money(b.amount)}</b></td><td>${b.date}</td><td>${badge(b.status)}</td><td>${b.status === "Pending" ? `<button class="action" onclick="payBill(${bills.indexOf(b)})">Pay</button>` : ""}<button class="action" onclick="receipt(${bills.indexOf(b)})">Print receipt</button></td></tr>`,
-      )
-      .join("") || `<tr><td colspan="6">No bills found</td></tr>`;
+  }
 }
-window.payBill = (i) => {
-  bills[i].status = "Paid";
-  renderBills();
-  alert("Payment recorded in demo");
-};
-window.receipt = (i) => {
-  let b = bills[i],
-    w = window.open("", "receipt", "width=500,height=600");
-  if (!w) return;
-  w.document.write(
-    `<h2>Northstar Hospital Receipt</h2><p>Patient: ${b.patient}</p><p>Service: ${b.service}</p><p>Amount: ${money(b.amount)}</p><p>Date: ${b.date}</p><p>Status: ${b.status}</p>`,
+
+function handlePrintBillReceipt(billId) {
+  const targetBill = hospitalSystemState.billsList.find(
+    (bill) => bill.id === billId,
   );
-  w.document.close();
-  w.print();
-};
-["bSearch", "bStatus", "bDate", "bService"].forEach(
-  (i) => ($("#" + i).oninput = renderBills),
-);
-$("#bClear").onclick = () => {
-  ["bSearch", "bStatus", "bDate", "bService"].forEach(
-    (i) => ($("#" + i).value = ""),
-  );
-  renderBills();
-};
-$("#addBill").onclick = () => {
-  let patient = prompt("Patient name");
-  if (!patient) return;
-  let service = prompt("Service name", "Consultation");
-  let amount = Number(prompt("Amount in INR", "1000"));
-  if (service && amount > 0) {
-    bills.push({
-      patient,
-      service,
-      amount,
-      date: today,
-      status: "Pending",
+  if (!targetBill) return;
+
+  const receiptWindow = window.open("", "_blank", "width=500,height=600");
+  receiptWindow.document.write(`
+        <html>
+          <head><title>Receipt ${targetBill.id}</title></head>
+          <body style="font-family: sans-serif; padding: 32px;">
+            <h2>MedCore Hospital — Official Payment Receipt</h2>
+            <hr/>
+            <p><strong>Invoice ID:</strong> ${targetBill.id}</p>
+            <p><strong>Patient Name:</strong> ${targetBill.patientName}</p>
+            <p><strong>Medical Service:</strong> ${targetBill.serviceName}</p>
+            <p><strong>Billing Date:</strong> ${targetBill.date}</p>
+            <p><strong>Amount:</strong> $${targetBill.paymentAmount.toFixed(2)}</p>
+            <p><strong>Payment Status:</strong> ${targetBill.isPaid ? "PAID IN FULL" : "PAYMENT PENDING"}</p>
+            <hr/>
+            <button onclick="window.print()">Print Now</button>
+          </body>
+        </html>
+      `);
+  receiptWindow.document.close();
+}
+
+/* ========================================================================
+       6. RENDER REPORTS VIEW (Inflow, Outflow & Revenue Statistics)
+       ======================================================================== */
+function renderHospitalReportStatistics() {
+  const totalPatientsForDay = hospitalSystemState.appointmentsList.length;
+  const upcomingAppointmentsCount = hospitalSystemState.appointmentsList.filter(
+    (apt) => apt.status === "Waiting",
+  ).length;
+  const completedVisitsCount = hospitalSystemState.appointmentsList.filter(
+    (apt) => apt.status === "Confirmed",
+  ).length;
+  const cancelledVisitsCount = hospitalSystemState.appointmentsList.filter(
+    (apt) => apt.status === "Cancelled",
+  ).length;
+
+  const dailyRevenueGenerated = hospitalSystemState.billsList
+    .filter((bill) => bill.isPaid)
+    .reduce((accumulator, bill) => accumulator + bill.paymentAmount, 0);
+
+  const pendingReceivables = hospitalSystemState.billsList
+    .filter((bill) => !bill.isPaid)
+    .reduce((accumulator, bill) => accumulator + bill.paymentAmount, 0);
+
+  const reportMetrics = [
+    {
+      label: "Total Patients Today (Inflow)",
+      value: totalPatientsForDay,
+      note: "All scheduled outpatient visits",
+    },
+    {
+      label: "Upcoming Appointments",
+      value: upcomingAppointmentsCount,
+      note: "Patients currently in waiting queue",
+    },
+    {
+      label: "Completed / Confirmed Visits (Outflow)",
+      value: completedVisitsCount,
+      note: "Consultations cleared today",
+    },
+    {
+      label: "Cancelled Appointments",
+      value: cancelledVisitsCount,
+      note: "No-shows or patient cancellations",
+    },
+    {
+      label: "Daily Revenue Generated",
+      value: `$${dailyRevenueGenerated.toFixed(2)}`,
+      note: "Collected from paid invoices",
+    },
+    {
+      label: "Pending Bill Collection",
+      value: `$${pendingReceivables.toFixed(2)}`,
+      note: "Awaiting patient settlement",
+    },
+  ];
+
+  const reportContainer = document.getElementById("report-metrics-grid");
+  reportContainer.innerHTML = reportMetrics
+    .map(
+      (metric) => `
+        <article class="stat-card">
+          <span class="stat-card-label">${metric.label}</span>
+          <span class="stat-card-value">${metric.value}</span>
+          <span class="stat-card-trend">${metric.note}</span>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+/* ========================================================================
+       7. POPULATE & HANDLE PROFILE SETTINGS FORM
+       ======================================================================== */
+function populateProfileSettingsForm() {
+  const profile = hospitalSystemState.currentLoggedInUserProfile;
+  document.getElementById("profile-first-name").value = profile.firstName;
+  document.getElementById("profile-middle-name").value = profile.middleName;
+  document.getElementById("profile-last-name").value = profile.lastName;
+  document.getElementById("profile-gender").value = profile.gender;
+  document.getElementById("profile-dob").value = profile.dob;
+  document.getElementById("profile-address").value = profile.address;
+  document.getElementById("profile-email").value = profile.email;
+  document.getElementById("profile-phone-number").value = profile.phoneNumber;
+}
+
+/* ========================================================================
+       MASTER VIEW SYNCHRONIZATION & EVENT LISTENERS
+       ======================================================================== */
+function renderAllViews() {
+  renderDashboardRoleStatistics();
+  renderAccountsTable();
+  renderAppointmentsTable();
+  renderOpdQueueTable();
+  renderBillingTable();
+  renderHospitalReportStatistics();
+}
+
+function switchActiveNavigationView(targetViewId, customTitleText) {
+  document.querySelectorAll(".view-section").forEach((section) => {
+    section.classList.remove("active-view");
+  });
+  document.getElementById(targetViewId).classList.add("active-view");
+
+  document.querySelectorAll(".nav-menu-button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.targetView === targetViewId);
+  });
+
+  if (customTitleText) {
+    document.getElementById("current-page-title").textContent = customTitleText;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  let accInfo = await sendRequest("/me");
+
+  if (accInfo) {
+    document.getElementById("header-username-display").textContent =
+      accInfo["username"];
+
+    let profileInfo = await sendRequest("/profile", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(accInfo),
     });
-    renderBills();
+
+    if (profileInfo) {
+      hospitalSystemState.currentLoggedInUserProfile = profileInfo;
+      hospitalSystemState.currentLoggedInUserProfile["username"] =
+        accInfo["username"];
+    }
   }
-};
-function exportCsv(rows, name) {
-  let csv = rows
-      .map((r) =>
-        r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\r\n"),
-    blob = new Blob([csv], { type: "text/csv" }),
-    url = URL.createObjectURL(blob),
-    a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-$("#billExport").onclick = () =>
-  exportCsv(
-    [
-      ["Patient", "Service", "Amount", "Date", "Status"],
-      ...bills.map((b) => [b.patient, b.service, b.amount, b.date, b.status]),
-    ],
-    "hms-bills.csv",
+
+  // Set default billing date to today
+  document.getElementById("bill-date-input").valueAsDate = new Date();
+
+  // Initial render
+  populateProfileSettingsForm();
+  renderAllViews();
+
+  // Sidebar Navigation Switching
+  const viewTitlesMap = {
+    "dashboard-view": "Hospital Overview Dashboard",
+    "accounts-view": "Users & Role Management",
+    "appointments-view": "Patient Appointment Scheduling",
+    "opd-queue-view": "Live Outpatient (OPD) Queue",
+    "billing-view": "Patient Billing & Payment Desk",
+    "reports-view": "Hospital Inflow & Outflow Analytics",
+  };
+
+  document.querySelectorAll(".nav-menu-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetView = button.dataset.targetView;
+      switchActiveNavigationView(targetView, viewTitlesMap[targetView]);
+    });
+  });
+
+  // Profile Top-Right Dropdown Toggle
+  const profileTriggerButton = document.getElementById("profile-menu-trigger");
+  const profileDropdownMenu = document.getElementById("profile-dropdown");
+
+  profileTriggerButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    profileDropdownMenu.classList.toggle("open");
+  });
+
+  document.addEventListener("click", () => {
+    profileDropdownMenu.classList.remove("open");
+  });
+
+  // Open Profile Settings View
+  document
+    .getElementById("open-profile-settings-btn")
+    .addEventListener("click", () => {
+      switchActiveNavigationView(
+        "profile-settings-view",
+        "Account Profile Settings",
+      );
+    });
+
+  // Logout Handler
+  document
+    .getElementById("logout-system-btn")
+    .addEventListener("click", async () => {
+      if (confirm("Are you sure you want to logout?")) {
+        const response = await fetch("/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        showToastNotification(
+          "Session terminated. Redirecting to Login Page...",
+        );
+
+        if (response.ok) {
+          window.location.href = "/";
+        }
+      }
+    });
+
+  // Save Updated Profile Settings
+  document
+    .getElementById("profile-settings-form")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const profile = hospitalSystemState.currentLoggedInUserProfile;
+      if (profile) {
+        const newProfile = {};
+        newProfile.firstName = document
+          .getElementById("profile-first-name")
+          .value.trim();
+        newProfile.middleName = document
+          .getElementById("profile-middle-name")
+          .value.trim();
+        newProfile.lastName = document
+          .getElementById("profile-last-name")
+          .value.trim();
+        newProfile.gender = document.getElementById("profile-gender").value;
+        newProfile.dob = document.getElementById("profile-dob").value;
+        newProfile.address = document
+          .getElementById("profile-address")
+          .value.trim();
+        newProfile.email = document
+          .getElementById("profile-email")
+          .value.trim();
+        newProfile.phoneNumber = document
+          .getElementById("profile-phone-number")
+          .value.trim();
+
+        const editProfileResponse = await sendRequest("/edit-profile", {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(newProfile),
+        });
+
+        if (editProfileResponse) {
+          if (editProfileResponse.success) {
+            hospitalSystemState.currentLoggedInUserProfile = newProfile;
+            showToastNotification("Profile settings updated successfully.");
+          } else showToastNotification(editProfileResponse.message);
+        }
+      } else showToastNotification("Could not update profile settings.");
+
+      // const updatedUsername = `dr.${profile.first_name.toLowerCase()}.${profile.last_name.toLowerCase()}`;
+      // profile.username = updatedUsername;
+      // document.getElementById("header-username-display").textContent =
+      //   updatedUsername;
+    });
+
+  document
+    .getElementById("profile-new-username-form")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const newUsername = document
+        .getElementById("profile-new-username")
+        .value.trim();
+
+      const changeUsernameResponse = await sendRequest("/change-username", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "text/plain",
+        },
+
+        body: newUsername,
+      });
+
+      if (changeUsernameResponse) {
+        if (changeUsernameResponse.success) {
+          // hospitalSystemState.currentLoggedInUserProfile.username = newUsername;
+          document.getElementById("header-username-display").textContent = newUsername;
+          showToastNotification("Profile settings updated successfully.");
+        } else showToastNotification(changeUsernameResponse.message);
+      } else showToastNotification("Could not update username.");
+    });
+
+  // Inline Section Toggles (Add Admin, Book Appointment, Create Bill)
+  const setupInlineSectionToggle = (openButtonId, closeButtonId, sectionId) => {
+    const sectionElement = document.getElementById(sectionId);
+    document.getElementById(openButtonId).addEventListener("click", () => {
+      sectionElement.classList.toggle("visible");
+    });
+    document.getElementById(closeButtonId).addEventListener("click", () => {
+      sectionElement.classList.remove("visible");
+    });
+  };
+
+  setupInlineSectionToggle(
+    "toggle-add-account-section-btn",
+    "close-add-account-section-btn",
+    "add-account-inline-section",
   );
-$("#reportExport").onclick = () =>
-  exportCsv(
-    [
-      ["Metric", "Value"],
-      ["Patients today", 126],
-      [
-        "Upcoming appointments",
-        appts.filter((a) => !["Cancelled", "Completed"].includes(a.status))
-          .length,
-      ],
-      [
-        "Completed visits",
-        appts.filter((a) => a.status === "Completed").length,
-      ],
-      [
-        "Daily revenue",
-        bills
-          .filter((b) => b.status === "Paid")
-          .reduce((s, b) => s + b.amount, 0),
-      ],
-      ["Outflow", 36200],
-    ],
-    "hms-report.csv",
+  setupInlineSectionToggle(
+    "toggle-book-appointment-btn",
+    "close-book-appointment-btn",
+    "book-appointment-inline-section",
   );
-$("#period").onchange = (e) => {
-  let p = e.target.value,
-    m = p === "Today" ? 1 : p === "This week" ? 6 : 27;
-  $("#rPatients").textContent = 126 * m;
-  $("#rUpcoming").textContent = 34 * m;
-  $("#rCompleted").textContent = 82 * m;
-  $("#rRevenue").textContent = money(84250 * m);
-};
-$("#globalSearch").oninput = (e) => {
-  let p = $(".view.active").id,
-    v = e.target.value;
-  if (p === "users") (($("#uSearch").value = v), renderUsers());
-  if (p === "appointments") (($("#aSearch").value = v), renderAppts());
-  if (p === "queue") (($("#qSearch").value = v), renderQueue());
-  if (p === "billing") (($("#bSearch").value = v), renderBills());
-};
-$("#profileForm").onsubmit = (e) => {
-  e.preventDefault();
-  $("#topName").textContent = $("#pUsername").value;
-  $("#profileNotice").textContent = "Profile changes saved in this demo.";
-  $("#profileNotice").classList.add("show");
-};
-$("#photoInput").onchange = (e) => {
-  let f = e.target.files[0];
-  if (f) {
-    photo = URL.createObjectURL(f);
-    $("#topPhoto").src = photo;
-    $("#photoPreview").src = photo;
-  }
-};
-$("#profileForm").onreset = () =>
-  setTimeout(() => {
-    $("#topPhoto").src = photo;
-    $("#photoPreview").src = photo;
-  }, 0);
-const profile = {
-  pUsername: "Olivia Martin",
-  pEmail: "olivia.martin@northstar.example",
-  pFirst: "Olivia",
-  pMiddle: "Rose",
-  pLast: "Martin",
-  pPhone: "+1 555 0184",
-  pAddress: "24 Wellness Avenue, Springfield",
-  pAge: "34",
-  pDob: "1992-04-18",
-  pGender: "Female",
-};
-Object.entries(profile).forEach(([id, val]) => ($("#" + id).value = val));
-updateCounts();
-renderDash();
-renderUsers();
-renderAppts();
-renderQueue();
-renderBills();
+  setupInlineSectionToggle(
+    "toggle-create-bill-btn",
+    "close-create-bill-btn",
+    "create-bill-inline-section",
+  );
+
+  // Add New Admin Form Submission
+  document
+    .getElementById("create-admin-form")
+    .addEventListener("submit", (event) => {
+      event.preventDefault();
+      const newAdminUsername = document
+        .getElementById("new-admin-username")
+        .value.trim();
+      hospitalSystemState.accountsList.push({
+        username: newAdminUsername,
+        role: "Admin",
+      });
+      event.target.reset();
+      document
+        .getElementById("add-account-inline-section")
+        .classList.remove("visible");
+      renderAllViews();
+      showToastNotification(
+        `New Admin "${newAdminUsername}" added to the system.`,
+      );
+    });
+
+  // Book New Appointment Form Submission
+  document
+    .getElementById("book-appointment-form")
+    .addEventListener("submit", (event) => {
+      event.preventDefault();
+      const newAppointmentRecord = {
+        id: `APT-${Math.floor(100 + Math.random() * 900)}`,
+        time: document.getElementById("appointment-time-input").value,
+        patientName: document
+          .getElementById("appointment-patient-input")
+          .value.trim(),
+        doctorName: document
+          .getElementById("appointment-doctor-input")
+          .value.trim(),
+        department: document.getElementById("appointment-department-input")
+          .value,
+        status: document.getElementById("appointment-status-input").value,
+      };
+
+      hospitalSystemState.appointmentsList.push(newAppointmentRecord);
+      event.target.reset();
+      document
+        .getElementById("book-appointment-inline-section")
+        .classList.remove("visible");
+      renderAllViews();
+      showToastNotification(
+        `Appointment booked for ${newAppointmentRecord.patientName} at ${newAppointmentRecord.time}.`,
+      );
+    });
+
+  // Create New Bill Form Submission
+  document
+    .getElementById("create-bill-form")
+    .addEventListener("submit", (event) => {
+      event.preventDefault();
+      const newBillRecord = {
+        id: `INV-${Math.floor(5000 + Math.random() * 4000)}`,
+        patientName: document
+          .getElementById("bill-patient-name-input")
+          .value.trim(),
+        serviceName: document.getElementById("bill-service-name-input").value,
+        paymentAmount: parseFloat(
+          document.getElementById("bill-amount-input").value,
+        ),
+        date: document.getElementById("bill-date-input").value,
+        isPaid: false,
+      };
+
+      hospitalSystemState.billsList.unshift(newBillRecord);
+      event.target.reset();
+      document.getElementById("bill-date-input").valueAsDate = new Date();
+      document
+        .getElementById("create-bill-inline-section")
+        .classList.remove("visible");
+      renderAllViews();
+      showToastNotification(
+        `New bill generated for ${newBillRecord.patientName}.`,
+      );
+    });
+
+  // Filter Input Listeners
+  ["user-search-filter", "user-role-filter"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", renderAccountsTable);
+  });
+
+  [
+    "appointment-search-filter",
+    "appointment-department-filter",
+    "appointment-status-filter",
+  ].forEach((id) => {
+    document
+      .getElementById(id)
+      .addEventListener("input", renderAppointmentsTable);
+  });
+
+  document
+    .getElementById("opd-status-priority-filter")
+    .addEventListener("change", renderOpdQueueTable);
+
+  [
+    "bill-patient-search-filter",
+    "bill-service-filter",
+    "bill-payment-status-filter",
+  ].forEach((id) => {
+    document.getElementById(id).addEventListener("input", renderBillingTable);
+  });
+
+  // Sortable Table Header Listeners
+  document.querySelectorAll(".sortable-column").forEach((headerCell) => {
+    headerCell.addEventListener("click", () => {
+      const tableKey = headerCell.dataset.table;
+      const columnKey = headerCell.dataset.column;
+      const currentSort = hospitalSystemState.sortingConfiguration[tableKey];
+
+      if (currentSort.column === columnKey) {
+        currentSort.direction =
+          currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        currentSort.column = columnKey;
+        currentSort.direction = "asc";
+      }
+
+      renderAllViews();
+    });
+  });
+});

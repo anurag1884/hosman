@@ -67,9 +67,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
 
-                        // User endpoints
-                        .requestMatchers("/user/**")
-                        .hasAnyRole("DOCTOR", "NURSE", "RECEPTIONIST", "PATIENT")
+                        // // User endpoints
+                        // .requestMatchers("/user/**")
+                        // .hasAnyRole("DOCTOR", "NURSE", "RECEPTIONIST", "PATIENT")
 
                         // Doctor-only endpoints
                         .requestMatchers("/doctor/**")

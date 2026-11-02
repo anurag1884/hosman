@@ -289,12 +289,10 @@ body {
   align-items: end;
   gap: 13px;
   border-bottom: 1px solid var(--line);
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 43px,
-    #eef0f5 44px
-  );
+  background: repeating-linear-gradient(to bottom,
+      transparent 0,
+      transparent 43px,
+      #eef0f5 44px);
 }
 
 .barpair {

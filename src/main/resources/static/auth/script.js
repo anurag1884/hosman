@@ -1,6 +1,12 @@
 const tabs = [...document.querySelectorAll(".tab")];
 const sections = [...document.querySelectorAll(".form-section")];
 
+async function sendRequest(url, request) {
+    const response = await fetch(url, request);
+    if (!response.ok) return null;
+    return await response.json();
+}
+
 function showSection(name) {
   tabs.forEach((tab) => {
     const active = tab.id === `${name}-tab`;
@@ -39,7 +45,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 
   const formData = new FormData(e.currentTarget);
 
-  const response = await fetch("/login", {
+  const loginResponse = await sendRequest("/login", {
     method: "POST",
 
     headers: {
@@ -52,17 +58,12 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     }),
   });
 
-  if (!response.ok) return;
-
-  const data = await response.json();
-
-  if (data.success) {
-    messageElement.textContent = "";
-    window.location.href = "/dashboard";
-  } else messageElement.textContent = data.message;
-
-  //   messageElement.textContent =
-  //     "Demo form submitted. Connect this form to your authentication backend.";
+  if (loginResponse) {
+    if (loginResponse.success) {
+      messageElement.textContent = "";
+      window.location.href = "/dashboard";
+    } else messageElement.textContent = loginResponse.message;
+  } else messageElement.textContent = "Server request failed";
 });
 
 document
@@ -78,7 +79,7 @@ document
       confirmPassword = formData.get("confirmPassword");
 
     if (password === confirmPassword) {
-      let response = await fetch("/register", {
+      const registerResponse = await sendRequest("/register", {
         method: "POST",
 
         headers: {
@@ -91,28 +92,14 @@ document
         }),
       });
 
-      if (!response.ok) return;
-
-      let data = await response.json();
-
-      if (data.success) {
-        messageElement.textContent = "";
-        showSection("login");
-      } else messageElement.textContent = data.message;
+      if (registerResponse) {
+        if (registerResponse.success) {
+          messageElement.textContent = "";
+          showSection("login");
+        } else messageElement.textContent = registerResponse.message;
+      } else messageElement.textContent = "Server request failed";
     } else
       messageElement.textContent = "Passwords do not match. Please recheck and try again...";
-    //   const username = document.getElementById("register-username").value;
-    //   const password = document.getElementById("register-password").value;
-    //   const confirmPassword = document.getElementById("confirm-password").value;
-    //   if (password !== confirmPassword) {
-    //     setMessage(true, "Passwords do not match.");
-    //     document.getElementById("confirm-password").focus();
-    //     return;
-    //   }
-
-    //   messageElement.style.color = "#31805c";
-    //   messageElement.textContent =
-    //     "Demo registration submitted. Connect this form to your account backend.";
   });
 
 // document.getElementById("forgot-link").addEventListener("click", (event) => {

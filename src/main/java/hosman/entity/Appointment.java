@@ -56,19 +56,19 @@ public class Appointment {
 
     public Long getId() {
 
-        return this.id;
+        return id;
 
     }
 
     public Patient getPatient() {
 
-        return this.patient;
+        return patient;
 
     }
 
     public Doctor getDoctor() {
 
-        return this.doctor;
+        return doctor;
 
     }
 

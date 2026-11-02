@@ -32,13 +32,13 @@ public class Receptionist {
 
     public Long getId() {
 
-        return this.id;
+        return id;
 
     }
 
     public Account getAccount() {
 
-        return this.account;
+        return account;
 
     }
 

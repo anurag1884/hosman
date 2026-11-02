@@ -8,17 +8,19 @@ import hosman.entity.Appointment;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // List<Appointment> findByPatientId(Long patientId);
+    List<Appointment> findByPatientId(Long patientId);
 
-    // List<Appointment> findByDoctorId(Long doctorId);
+    List<Appointment> findByDoctorId(Long doctorId);
 
-    List<Appointment> findByPatientAccountUsername(String username);
+    List<Appointment> findByPatientIdAndDoctorId(Long patientId, Long doctorId);
 
-    List<Appointment> findByDoctorAccountUsername(String username);
+    // List<Appointment> findByPatientAccountUsername(String username);
 
-    List<Appointment> findByPatientAccountUsernameAndDoctorAccountUsername(
-            String patientUsername, String doctorUsername);
+    // List<Appointment> findByDoctorAccountUsername(String username);
 
-    List<Appointment> findByStatus(String status);
+    // List<Appointment> findByPatientAccountUsernameAndDoctorAccountUsername(
+    //         String patientUsername, String doctorUsername);
+
+    // List<Appointment> findByStatus(String status);
 
 }

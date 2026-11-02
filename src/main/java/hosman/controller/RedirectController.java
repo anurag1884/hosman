@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RedirectController {
 
+    //
+    // Endpoints
+    //
+
     @GetMapping("/")
     public String home(Authentication auth) {
 
@@ -41,6 +45,10 @@ public class RedirectController {
         return "redirect:/";
 
     }
+
+    //
+    // Private methods
+    //
 
     private boolean isAuthenticated(Authentication auth) {
 

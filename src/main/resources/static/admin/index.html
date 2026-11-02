@@ -1,673 +1,549 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Northstar HMS Dashboard</title>
-    <link rel="stylesheet" type="text/css" href="auth/style.css" />
-  </head>
-  <body>
-    <div class="app">
-      <aside class="side" id="sidebar">
-        <div class="brand">
-          <span class="mark">✦</span>Northstar
-          <small style="color: #9098a8">HMS</small>
-        </div>
-        <div>
-          <div class="navlabel">Workspace</div>
-          <nav class="nav">
-            <button class="active" data-page="dashboard">▦ Dashboard</button
-            ><button data-page="users">♙ Users</button
-            ><button data-page="appointments">▣ Appointments</button
-            ><button data-page="queue">☷ OPD Queue</button
-            ><button data-page="billing">▤ Billing</button
-            ><button data-page="reports">▥ Reports</button>
-          </nav>
-        </div>
-        <div class="sidefoot">
-          Northstar Hospital<br />Management workspace · Demo data
-        </div>
-      </aside>
-      <main class="main">
-        <header class="top">
-          <div>
-            <button class="btn mobile" id="mobile">☰</button>
-            <span class="search"
-              ><input id="globalSearch" placeholder="Search current records..."
-            /></span>
-          </div>
-          <div class="menu">
-            <button class="profile" id="profileBtn">
-              <img
-                class="avatar"
-                id="topPhoto"
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
-                alt="Profile photo"
-              /><span
-                ><strong id="topName">Olivia Martin</strong
-                ><small>Administrator</small></span
-              >⌄
-            </button>
-            <div class="dropdown" id="dropdown">
-              <button data-page="profile">⚙ Profile settings</button
-              ><button id="logout">↪ Log out</button>
-            </div>
-          </div>
-        </header>
-        <div class="content">
-          <section class="view active" id="dashboard">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Overview</div>
-                <h1>Dashboard</h1>
-                <p>Hospital activity and staff overview.</p>
-              </div>
-              <button class="btn primary" data-page="appointments">
-                ＋ New appointment
-              </button>
-            </div>
-            <div class="stats">
-              <div class="stat">
-                <div class="statlabel">Patients</div>
-                <div class="statnum" id="countPatient">1,284</div>
-                <small>Registered patients</small>
-              </div>
-              <div class="stat">
-                <div class="statlabel">Doctors</div>
-                <div class="statnum" id="countDoctor">48</div>
-                <small>Across departments</small>
-              </div>
-              <div class="stat">
-                <div class="statlabel">Nurses</div>
-                <div class="statnum" id="countNurse">96</div>
-                <small>Active staff</small>
-              </div>
-              <div class="stat">
-                <div class="statlabel">Admins</div>
-                <div class="statnum" id="countAdmin">8</div>
-                <small>Administrators</small>
-              </div>
-              <div class="stat">
-                <div class="statlabel">Receptionists</div>
-                <div class="statnum" id="countReceptionist">14</div>
-                <small>Front desk</small>
-              </div>
-            </div>
-            <div class="two">
-              <div class="panel">
-                <h2>Patient visits · This week</h2>
-                <div class="bars">
-                  <div class="barpair">
-                    <i class="bar" style="height: 48%"></i
-                    ><i class="bar" style="height: 64%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 55%"></i
-                    ><i class="bar" style="height: 74%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 42%"></i
-                    ><i class="bar" style="height: 58%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 68%"></i
-                    ><i class="bar" style="height: 82%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 52%"></i
-                    ><i class="bar" style="height: 70%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 78%"></i
-                    ><i class="bar" style="height: 91%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 60%"></i
-                    ><i class="bar" style="height: 73%"></i>
-                  </div>
-                </div>
-                <div class="labels">
-                  <span>Mon</span><span>Tue</span><span>Wed</span
-                  ><span>Thu</span><span>Fri</span><span>Sat</span
-                  ><span>Sun</span>
-                </div>
-              </div>
-              <div class="panel">
-                <h2>Department activity</h2>
-                <p>Appointments by department</p>
-                <div class="dept">
-                  <span>Cardiology</span>
-                  <div class="track"><i style="width: 84%"></i></div>
-                  <b>84</b>
-                </div>
-                <div class="dept">
-                  <span>Neurology</span>
-                  <div class="track"><i style="width: 66%"></i></div>
-                  <b>66</b>
-                </div>
-                <div class="dept">
-                  <span>Orthopedics</span>
-                  <div class="track"><i style="width: 58%"></i></div>
-                  <b>58</b>
-                </div>
-                <div class="dept">
-                  <span>Pediatrics</span>
-                  <div class="track"><i style="width: 47%"></i></div>
-                  <b>47</b>
-                </div>
-                <div class="dept">
-                  <span>Dermatology</span>
-                  <div class="track"><i style="width: 35%"></i></div>
-                  <b>35</b>
-                </div>
-              </div>
-            </div>
-            <div class="panel">
-              <h2>Upcoming appointments</h2>
-              <div class="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Patient</th>
-                      <th>Doctor</th>
-                      <th>Department</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dashTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <section class="view" id="users">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Administration</div>
-                <h1>Users</h1>
-                <p>Manage staff accounts and access roles.</p>
-              </div>
-              <button class="btn primary" id="userToggle">
-                ＋ Add new admin
-              </button>
-            </div>
-            <div class="formpanel" id="userPanel">
-              <h2>Add administrator</h2>
-              <form id="userForm">
-                <div class="fields">
-                  <label>Username<input name="username" required /></label
-                  ><label>Full name<input name="name" required /></label
-                  ><label
-                    >Email<input name="email" type="email" required /></label
-                  ><label
-                    >Role<select name="role">
-                      <option>Admin</option>
-                      <option>Doctor</option>
-                      <option>Nurse</option>
-                      <option>Receptionist</option>
-                      <option>Patient</option>
-                    </select></label
-                  ><label>Department<input name="department" /></label
-                  ><label
-                    >Temporary password<input
-                      name="password"
-                      type="password"
-                      minlength="8"
-                      required
-                  /></label>
-                </div>
-                <div class="formactions">
-                  <button type="button" class="btn" data-close="userPanel">
-                    Cancel</button
-                  ><button class="btn primary">Create user</button>
-                </div>
-              </form>
-            </div>
-            <div class="filters">
-              <input id="uSearch" placeholder="Search username / name" /><select
-                id="uRole"
-              >
-                <option value="">All roles</option>
-                <option>Admin</option>
-                <option>Doctor</option>
-                <option>Nurse</option>
-                <option>Receptionist</option>
-                <option>Patient</option></select
-              ><select id="uDept">
-                <option value="">All departments</option>
-                <option>Cardiology</option>
-                <option>Neurology</option>
-                <option>Orthopedics</option>
-                <option>Pediatrics</option>
-                <option>General</option></select
-              ><select id="uStatus">
-                <option value="">All statuses</option>
-                <option>Active</option>
-                <option>Inactive</option></select
-              ><button class="btn" id="uClear">Clear</button>
-            </div>
-            <div class="panel">
-              <h2 id="uCount">User directory</h2>
-              <div class="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th><button data-usort="username">Username ↕</button></th>
-                      <th><button data-usort="name">Full name ↕</button></th>
-                      <th><button data-usort="role">Role ↕</button></th>
-                      <th>Department</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="userTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <section class="view" id="appointments">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Care coordination</div>
-                <h1>Appointments</h1>
-                <p>Schedule and manage patient consultations.</p>
-              </div>
-              <button class="btn primary" id="apptToggle">
-                ＋ Book appointment
-              </button>
-            </div>
-            <div class="formpanel" id="apptPanel">
-              <h2>Book new appointment</h2>
-              <form id="apptForm">
-                <div class="fields">
-                  <label>Patient<input name="patient" required /></label
-                  ><label
-                    >Doctor<select name="doctor" required>
-                      <option>Dr. Amelia Chen</option>
-                      <option>Dr. Noah Williams</option>
-                      <option>Dr. Priya Sharma</option>
-                      <option>Dr. Ethan Patel</option>
-                    </select></label
-                  ><label
-                    >Department<select name="department">
-                      <option>Cardiology</option>
-                      <option>Neurology</option>
-                      <option>Orthopedics</option>
-                      <option>Pediatrics</option>
-                      <option>General</option>
-                    </select></label
-                  ><label>Date<input name="date" type="date" required /></label
-                  ><label>Time<input name="time" type="time" required /></label
-                  ><label
-                    >Status<select name="status">
-                      <option>Confirmed</option>
-                      <option>Waiting</option>
-                      <option>Cancelled</option>
-                    </select></label
-                  >
-                </div>
-                <div class="formactions">
-                  <button type="button" class="btn" data-close="apptPanel">
-                    Cancel</button
-                  ><button class="btn primary">Save appointment</button>
-                </div>
-              </form>
-            </div>
-            <div class="filters">
-              <input id="aSearch" placeholder="Search patient / doctor" /><input
-                id="aDate"
-                type="date"
-              /><select id="aStatus">
-                <option value="">All statuses</option>
-                <option>Waiting</option>
-                <option>Confirmed</option>
-                <option>Completed</option>
-                <option>Cancelled</option></select
-              ><select id="aDept">
-                <option value="">All departments</option>
-                <option>Cardiology</option>
-                <option>Neurology</option>
-                <option>Orthopedics</option>
-                <option>Pediatrics</option>
-                <option>General</option></select
-              ><button class="btn" id="aClear">Clear</button>
-            </div>
-            <div class="panel">
-              <h2 id="aCount">Appointment schedule</h2>
-              <div class="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th><button data-asort="time">Time ↕</button></th>
-                      <th><button data-asort="patient">Patient ↕</button></th>
-                      <th><button data-asort="doctor">Doctor ↕</button></th>
-                      <th>
-                        <button data-asort="department">Department ↕</button>
-                      </th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="apptTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <section class="view" id="queue">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Patient flow</div>
-                <h1>OPD Queue</h1>
-                <p>Patient appointments by time and status.</p>
-              </div>
-              <button class="btn" id="refreshQueue">↻ Refresh</button>
-            </div>
-            <div class="chips">
-              <div class="chip"><b id="qWaiting">0</b>Waiting</div>
-              <div class="chip"><b id="qConfirmed">0</b>Confirmed</div>
-              <div class="chip"><b id="qCancelled">0</b>Cancelled</div>
-            </div>
-            <div class="filters">
-              <input
-                id="qSearch"
-                placeholder="Search patient / doctor"
-              /><select id="qStatus">
-                <option value="">All statuses</option>
-                <option>Waiting</option>
-                <option>Confirmed</option>
-                <option>Cancelled</option></select
-              ><select id="qDept">
-                <option value="">All departments</option>
-                <option>Cardiology</option>
-                <option>Neurology</option>
-                <option>Orthopedics</option>
-                <option>Pediatrics</option>
-                <option>General</option></select
-              ><input id="qDate" type="date" /><button class="btn" id="qClear">
-                Clear
-              </button>
-            </div>
-            <div class="panel">
-              <h2>Outpatient queue · Sorted by time</h2>
-              <div class="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Queue #</th>
-                      <th>Patient</th>
-                      <th>Doctor</th>
-                      <th>Department</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="queueTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <section class="view" id="billing">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Finance</div>
-                <h1>Billing</h1>
-                <p>Patient charges and payments after consultation.</p>
-              </div>
-              <button class="btn" id="billExport">Export CSV</button>
-            </div>
-            <div class="cards">
-              <div class="card">
-                <small>Total billed</small><strong id="billTotal">₹0</strong
-                ><span>All records</span>
-              </div>
-              <div class="card">
-                <small>Paid</small><strong id="billPaid">₹0</strong
-                ><span>Collected</span>
-              </div>
-              <div class="card">
-                <small>Outstanding</small><strong id="billDue">₹0</strong
-                ><span style="color: #a66b15">Pending</span>
-              </div>
-              <div class="card">
-                <small>Invoices</small><strong id="billCount">0</strong
-                ><span>Service records</span>
-              </div>
-            </div>
-            <div class="filters">
-              <input
-                id="bSearch"
-                placeholder="Search patient / service"
-              /><select id="bStatus">
-                <option value="">All payments</option>
-                <option>Paid</option>
-                <option>Pending</option></select
-              ><input id="bDate" type="date" /><select id="bService">
-                <option value="">All services</option>
-                <option>Consultation</option>
-                <option>Therapy</option>
-                <option>Lab test</option>
-                <option>Imaging</option></select
-              ><button class="btn" id="bClear">Clear</button>
-            </div>
-            <div class="panel">
-              <div
-                style="display: flex; justify-content: space-between; gap: 12px"
-              >
-                <h2 id="bCount">Patient bills</h2>
-                <button class="btn primary" id="addBill">＋ Add bill</button>
-              </div>
-              <div class="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Patient name</th>
-                      <th>Service name</th>
-                      <th>Payment amount</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="billTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <section class="view" id="reports">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Analytics</div>
-                <h1>Reports</h1>
-                <p>Hospital inflow, outflow, and daily operations.</p>
-              </div>
-              <select class="btn" id="period">
-                <option>Today</option>
-                <option>This week</option>
-                <option>This month</option>
-              </select>
-            </div>
-            <div class="cards">
-              <div class="card">
-                <small>Total patients today</small
-                ><strong id="rPatients">126</strong><span>Daily visits</span>
-              </div>
-              <div class="card">
-                <small>Upcoming appointments</small
-                ><strong id="rUpcoming">34</strong><span>Scheduled</span>
-              </div>
-              <div class="card">
-                <small>Completed visits</small
-                ><strong id="rCompleted">82</strong><span>Completed</span>
-              </div>
-              <div class="card">
-                <small>Daily revenue</small
-                ><strong id="rRevenue">₹84,250</strong
-                ><span>Payments received</span>
-              </div>
-            </div>
-            <div class="two">
-              <div class="panel">
-                <h2>Revenue / expenses · weekly</h2>
-                <div class="bars">
-                  <div class="barpair">
-                    <i class="bar" style="height: 38%"></i
-                    ><i class="bar" style="height: 63%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 44%"></i
-                    ><i class="bar" style="height: 70%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 36%"></i
-                    ><i class="bar" style="height: 59%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 53%"></i
-                    ><i class="bar" style="height: 78%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 47%"></i
-                    ><i class="bar" style="height: 86%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 62%"></i
-                    ><i class="bar" style="height: 94%"></i>
-                  </div>
-                  <div class="barpair">
-                    <i class="bar" style="height: 51%"></i
-                    ><i class="bar" style="height: 75%"></i>
-                  </div>
-                </div>
-                <div class="labels">
-                  <span>Mon</span><span>Tue</span><span>Wed</span
-                  ><span>Thu</span><span>Fri</span><span>Sat</span
-                  ><span>Sun</span>
-                </div>
-              </div>
-              <div class="panel">
-                <h2>Daily operations</h2>
-                <div class="dept">
-                  <span>Admissions</span>
-                  <div class="track"><i style="width: 72%"></i></div>
-                  <b>18</b>
-                </div>
-                <div class="dept">
-                  <span>Discharges</span>
-                  <div class="track"><i style="width: 45%"></i></div>
-                  <b>11</b>
-                </div>
-                <div class="dept">
-                  <span>Lab orders</span>
-                  <div class="track"><i style="width: 85%"></i></div>
-                  <b>94</b>
-                </div>
-                <div class="dept">
-                  <span>Bed occupancy</span>
-                  <div class="track"><i style="width: 76%"></i></div>
-                  <b>76%</b>
-                </div>
-                <div class="dept">
-                  <span>Avg. wait</span>
-                  <div class="track"><i style="width: 33%"></i></div>
-                  <b>18m</b>
-                </div>
-              </div>
-            </div>
-            <div class="panel">
-              <h2>Report note</h2>
-              <p>
-                Dashboard metrics are sample data. Production reports should use
-                verified records, role-based access, audit logs, and privacy
-                safeguards.
-              </p>
-              <button class="btn" id="reportExport">Export report</button>
-            </div>
-          </section>
-          <section class="view" id="profile">
-            <div class="head">
-              <div>
-                <div class="eyebrow">Account</div>
-                <h1>Profile settings</h1>
-                <p>Update account details and profile photo.</p>
-              </div>
-            </div>
-            <div class="panel profileform">
-              <div class="notice" id="profileNotice"></div>
-              <form id="profileForm">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 13px;
-                    margin-bottom: 18px;
-                  "
-                >
-                  <img
-                    class="avatar"
-                    id="photoPreview"
-                    style="width: 62px; height: 62px"
-                    alt="Profile photo"
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
-                  /><label style="font-size: 11px"
-                    >Profile photo<input
-                      type="file"
-                      id="photoInput"
-                      accept="image/*"
-                      style="display: block; margin-top: 8px"
-                  /></label>
-                </div>
-                <div class="fields">
-                  <label
-                    >Username<input
-                      id="pUsername"
-                      name="username"
-                      required /></label
-                  ><label
-                    >Email<input id="pEmail" name="email" type="email" /></label
-                  ><label
-                    >First name<input id="pFirst" name="first_name" /></label
-                  ><label
-                    >Middle name<input id="pMiddle" name="middle_name" /></label
-                  ><label>Last name<input id="pLast" name="last_name" /></label
-                  ><label
-                    >Phone number<input
-                      id="pPhone"
-                      name="phone_number"
-                      type="tel" /></label
-                  ><label>Address<input id="pAddress" name="address" /></label
-                  ><label
-                    >Age<input
-                      id="pAge"
-                      name="age"
-                      type="number"
-                      min="0"
-                      max="120" /></label
-                  ><label
-                    >Date of birth<input
-                      id="pDob"
-                      name="dob"
-                      type="date" /></label
-                  ><label
-                    >Gender<select id="pGender" name="gender">
-                      <option value="">Select</option>
-                      <option>Female</option>
-                      <option>Male</option>
-                      <option>Non-binary</option>
-                      <option>Prefer not to say</option>
-                    </select></label
-                  >
-                </div>
-                <div class="formactions">
-                  <button class="btn" type="reset">Reset</button
-                  ><button class="btn primary">Save changes</button>
-                </div>
-              </form>
-            </div>
-          </section>
-        </div>
-      </main>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedCore HMS — Hospital Management Dashboard</title>
+  <link rel="stylesheet" type="text/css" href="admin/style.css" />
+</head>
+
+<body>
+
+  <!-- ========================================================================
+       LEFT NAVIGATION PANE
+       ======================================================================== -->
+  <aside class="sidebar-navigation" aria-label="Main Navigation">
+    <div class="brand-header">
+      <div class="brand-logo-badge">+</div>
+      <span>MedCore HMS</span>
     </div>
 
-    <script type="text/javascript" src="admin/script.js"></script>
-  </body>
+    <ul class="nav-menu-list">
+      <li>
+        <button class="nav-menu-button active" data-target-view="dashboard-view">
+          <span>Dashboard</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-menu-button" data-target-view="accounts-view">
+          <span>Accounts</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-menu-button" data-target-view="appointments-view">
+          <span>Appointments</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-menu-button" data-target-view="opd-queue-view">
+          <span>OPD Queue</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-menu-button" data-target-view="billing-view">
+          <span>Billing</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-menu-button" data-target-view="reports-view">
+          <span>Report</span>
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ========================================================================
+       MAIN WORKSPACE
+       ======================================================================== -->
+  <div class="main-workspace">
+
+    <!-- TOP HEADER WITH PROFILE SETTINGS & LOGOUT -->
+    <header class="top-navbar">
+      <h1 class="page-Header-title" id="current-page-title">Hosman Dashboard</h1>
+
+      <div class="profile-menu-container">
+        <button class="profile-trigger-button" id="profile-menu-trigger" aria-expanded="false">
+          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=120&q=80"
+            alt="Profile Photo" class="profile-avatar" />
+          <div class="profile-user-info">
+            <span class="profile-username" id="header-username-display"></span>
+            <span class="profile-role-badge">Administrator</span>
+          </div>
+        </button>
+
+        <div class="profile-dropdown-menu" id="profile-dropdown">
+          <button class="dropdown-action-item" id="open-profile-settings-btn">
+            Account Profile Settings
+          </button>
+          <button class="dropdown-action-item logout-button" id="logout-system-btn">
+            Log Out of HMS
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="viewport-content">
+
+      <!-- ====================================================================
+           1. DASHBOARD VIEW (Role Counts)
+           ==================================================================== -->
+      <section id="dashboard-view" class="view-section active-view">
+        <div class="section-Split-header">
+          <div>
+            <h2>Staff &amp; Patient Directory Statistics</h2>
+            <p class="section-subtitle">Live headcount breakdown across hospital roles</p>
+          </div>
+        </div>
+
+        <div class="stats-card-grid" id="dashboard-role-stats-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           2. ACCOUNTS VIEW (Sortable Table + Inline Add Admin + Filter Panel)
+           ==================================================================== -->
+      <section id="accounts-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>View Accounts</h2>
+            <p class="section-subtitle">Manage hospital personnel and registered patients</p>
+          </div>
+          <button class="btn btn-primary" id="toggle-add-account-section-btn">
+            + Add New Account
+          </button>
+        </div>
+
+        <!-- Inline New Admin Registration Section (Non-Floating) -->
+        <div class="inline-creation-section" id="add-account-inline-section">
+          <div class="inline-section-header">
+            <h3>Register New Account</h3>
+            <button class="btn btn-secondary btn-sm" id="close-add-account-section-btn">Close Section</button>
+          </div>
+          <form id="create-admin-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="new-admin-username">Username</label>
+                <input type="text" id="new-admin-username" class="form-control" placeholder="e.g., admin.priya.sharma"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="new-admin-email">Email</label>
+                <input type="email" id="new-admin-email" class="form-control" placeholder="priya.sharma@medcore.org"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="new-admin-role">Role</label>
+                <select id="user-role-filter" class="form-control">
+                  <option selected disabled value="">(Select Role)</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="Nurse">Nurse</option>
+                  <option value="Receptionist">Receptionist</option>
+                  <option value="Patient">Patient</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Create Account</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filter Panel Below Top-Right Button -->
+        <div class="filter-panel">
+          <div class="form-group">
+            <label class="form-label" for="user-search-filter">Search by Username</label>
+            <input type="text" id="user-search-filter" class="form-control" placeholder="Filter username..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="user-role-filter">Filter by Role</label>
+            <select id="user-role-filter" class="form-control">
+              <option value="ALL">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Doctor">Doctor</option>
+              <option value="Nurse">Nurse</option>
+              <option value="Receptionist">Receptionist</option>
+              <option value="Patient">Patient</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-card-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="sortable-column col-expanded" data-table="users" data-column="username">
+                  Username <span class="sort-indicator">↕</span>
+                </th>
+                <th class="sortable-column" data-table="users" data-column="role">
+                  Role <span class="sort-indicator">↕</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           3. APPOINTMENTS VIEW (Sortable + Inline Booking + Filter Panel)
+           ==================================================================== -->
+      <section id="appointments-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>Patient Appointments</h2>
+            <p class="section-subtitle">Schedule, filter, and manage outpatient consultations</p>
+          </div>
+          <button class="btn btn-primary" id="toggle-book-appointment-btn">
+            + Book New Appointment
+          </button>
+        </div>
+
+        <!-- Inline Book Appointment Section (Non-Floating) -->
+        <div class="inline-creation-section" id="book-appointment-inline-section">
+          <div class="inline-section-header">
+            <h3>Book New Patient Appointment</h3>
+            <button class="btn btn-secondary btn-sm" id="close-book-appointment-btn">Close Section</button>
+          </div>
+          <form id="book-appointment-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="appointment-time-input">Appointment Time</label>
+                <input type="time" id="appointment-time-input" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="appointment-patient-input">Patient Full Name</label>
+                <input type="text" id="appointment-patient-input" class="form-control" placeholder="e.g., Rohan Verma"
+                  required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="appointment-doctor-input">Assigned Doctor</label>
+                <input type="text" id="appointment-doctor-input" class="form-control"
+                  placeholder="e.g., Dr. Kavita Nair" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="appointment-department-input">Department</label>
+                <select id="appointment-department-input" class="form-control" required>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Orthopedics">Orthopedics</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="General Medicine">General Medicine</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="appointment-status-input">Initial Status</label>
+                <select id="appointment-status-input" class="form-control" required>
+                  <option value="Waiting">Waiting</option>
+                  <option value="Confirmed">Confirmed</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filter Panel Below Button -->
+        <div class="filter-panel">
+          <div class="form-group">
+            <label class="form-label" for="appointment-search-filter">Patient or Doctor Name</label>
+            <input type="text" id="appointment-search-filter" class="form-control"
+              placeholder="Search patient or doctor..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="appointment-department-filter">Department</label>
+            <select id="appointment-department-filter" class="form-control">
+              <option value="ALL">All Departments</option>
+              <option value="Cardiology">Cardiology</option>
+              <option value="Orthopedics">Orthopedics</option>
+              <option value="Neurology">Neurology</option>
+              <option value="General Medicine">General Medicine</option>
+              <option value="Pediatrics">Pediatrics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="appointment-status-filter">Appointment Status</label>
+            <select id="appointment-status-filter" class="form-control">
+              <option value="ALL">All Statuses</option>
+              <option value="Waiting">Waiting</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="table-card-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="sortable-column" data-table="appointments" data-column="time">Time <span
+                    class="sort-indicator">↕</span></th>
+                <th class="sortable-column" data-table="appointments" data-column="patientName">Patient <span
+                    class="sort-indicator">↕</span></th>
+                <th class="sortable-column" data-table="appointments" data-column="doctorName">Doctor <span
+                    class="sort-indicator">↕</span></th>
+                <th class="sortable-column" data-table="appointments" data-column="department">Department <span
+                    class="sort-indicator">↕</span></th>
+                <th class="sortable-column" data-table="appointments" data-column="status">Status <span
+                    class="sort-indicator">↕</span></th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="appointments-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           4. OPD QUEUE VIEW (Sorted by Timings & Status)
+           ==================================================================== -->
+      <section id="opd-queue-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>Live Outpatient Department (OPD) Queue</h2>
+            <p class="section-subtitle">Synchronized token queue ordered by appointment timing and consultation status
+            </p>
+          </div>
+        </div>
+
+        <div class="filter-panel">
+          <div class="form-group">
+            <label class="form-label" for="opd-status-priority-filter">Filter Queue by Status</label>
+            <select id="opd-status-priority-filter" class="form-control">
+              <option value="ALL">All Statuses (Waiting, Confirmed, Cancelled)</option>
+              <option value="Waiting">Waiting Only</option>
+              <option value="Confirmed">Confirmed Only</option>
+              <option value="Cancelled">Cancelled Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-card-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="sortable-column" data-table="opd" data-column="time">Scheduled Time <span
+                    class="sort-indicator">↕</span></th>
+                <th>Patient Name</th>
+                <th>Consulting Doctor</th>
+                <th>Department</th>
+                <th class="sortable-column" data-table="opd" data-column="status">Queue Status <span
+                    class="sort-indicator">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="opd-queue-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           5. BILLING VIEW (Table + Inline Create Bill + Filter Panel)
+           ==================================================================== -->
+      <section id="billing-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>Patient Billing &amp; Invoices</h2>
+            <p class="section-subtitle">Track post-consultation charges, collect payments, and print receipts</p>
+          </div>
+          <button class="btn btn-primary" id="toggle-create-bill-btn">
+            + Create New Bill
+          </button>
+        </div>
+
+        <!-- Inline Create Bill Section (Non-Floating) -->
+        <div class="inline-creation-section" id="create-bill-inline-section">
+          <div class="inline-section-header">
+            <h3>Generate New Patient Invoice</h3>
+            <button class="btn btn-secondary btn-sm" id="close-create-bill-btn">Close Section</button>
+          </div>
+          <form id="create-bill-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="bill-patient-name-input">Patient Name</label>
+                <input type="text" id="bill-patient-name-input" class="form-control"
+                  placeholder="e.g., Ananya Chatterjee" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bill-service-name-input">Service Name</label>
+                <select id="bill-service-name-input" class="form-control" required>
+                  <option value="Consultation">Consultation</option>
+                  <option value="Physical Therapy">Physical Therapy</option>
+                  <option value="Diagnostic Lab Panel">Diagnostic Lab Panel</option>
+                  <option value="MRI / Radiology Scan">MRI / Radiology Scan</option>
+                  <option value="Minor Procedure">Minor Procedure</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bill-amount-input">Payment Amount ($)</label>
+                <input type="number" id="bill-amount-input" class="form-control" min="1" step="0.01"
+                  placeholder="150.00" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bill-date-input">Billing Date</label>
+                <input type="date" id="bill-date-input" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Issue Bill</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Billing Filter Panel -->
+        <div class="filter-panel">
+          <div class="form-group">
+            <label class="form-label" for="bill-patient-search-filter">Search Patient</label>
+            <input type="text" id="bill-patient-search-filter" class="form-control" placeholder="Patient name..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bill-service-filter">Service Type</label>
+            <select id="bill-service-filter" class="form-control">
+              <option value="ALL">All Services</option>
+              <option value="Consultation">Consultation</option>
+              <option value="Physical Therapy">Physical Therapy</option>
+              <option value="Diagnostic Lab Panel">Diagnostic Lab Panel</option>
+              <option value="MRI / Radiology Scan">MRI / Radiology Scan</option>
+              <option value="Minor Procedure">Minor Procedure</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bill-payment-status-filter">Payment Status</label>
+            <select id="bill-payment-status-filter" class="form-control">
+              <option value="ALL">All Bills</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Billing Table -->
+        <div class="table-card-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Service Name</th>
+                <th>Payment Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="billing-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           6. REPORT VIEW (Daily Inflow, Outflow, & Revenue Metrics)
+           ==================================================================== -->
+      <section id="reports-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>Daily Hospital Inflow &amp; Outflow Report</h2>
+            <p class="section-subtitle">Real-time operational throughput and financial summary for today</p>
+          </div>
+        </div>
+
+        <div class="stats-card-grid" id="report-metrics-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           7. PROFILE SETTINGS VIEW (Inline Section for Updating Account Details)
+           ==================================================================== -->
+      <section id="profile-settings-view" class="view-section">
+        <div class="section-Split-header">
+          <div>
+            <h2>Update Profile</h2>
+            <p class="section-subtitle">Update personal and contact details</p>
+          </div>
+        </div>
+
+        <div class="table-card-container" style="padding: 28px;">
+          <form id="profile-settings-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="profile-first-name">First Name</label>
+                <input type="text" id="profile-first-name" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-middle-name">Middle Name</label>
+                <input type="text" id="profile-middle-name" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-last-name">Last Name</label>
+                <input type="text" id="profile-last-name" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-gender">Gender</label>
+                <select id="profile-gender" class="form-control">
+                  <option value="" selected>(Select Gender)</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-dob">Date of Birth</label>
+                <input type="date" id="profile-dob" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-email">Email Address</label>
+                <input type="email" id="profile-email" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-phone-number">Phone Number</label>
+                <input type="tel" id="profile-phone-number" class="form-control" />
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="profile-address">Residential Address</label>
+                <textarea id="profile-address" class="form-control" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Update Profile Details</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="section-Split-header" style="margin-top: 18px">
+          <h2>Change Username</h2>
+        </div>
+
+        <div class="table-card-container" style="padding: 28px">
+          <form id="profile-new-username-form">
+            <div class="form-group">
+              <label class="form-label" for="profile-new-username">Username</label>
+              <input type="text" id="profile-new-username" class="form-control" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Change Username</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Element -->
+  <div id="toast-notification" class="notification-banner" role="status" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       APPLICATION LOGIC (Readable, Modular, State-Driven JavaScript)
+       ======================================================================== -->
+  <script type="text/javascript" src="admin/script.js"></script>
+</body>
+
 </html>

@@ -8,6 +8,8 @@ import hosman.entity.Receptionist;
 
 public interface ReceptionistRepository extends JpaRepository<Receptionist, Long> {
 
-    Optional<Receptionist> findByAccountUsername(String username);
+    Optional<Receptionist> findByAccountId(Long id);
+    
+    // Optional<Receptionist> findByAccountUsername(String username);
 
 }

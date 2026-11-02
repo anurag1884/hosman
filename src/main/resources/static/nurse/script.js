@@ -123,12 +123,12 @@ function renderUsers() {
 }
 $$("[data-usort]").forEach(
   (b) =>
-    (b.onclick = () => {
-      let k = b.dataset.usort;
-      userDir = userSort === k ? -userDir : 1;
-      userSort = k;
-      renderUsers();
-    }),
+  (b.onclick = () => {
+    let k = b.dataset.usort;
+    userDir = userSort === k ? -userDir : 1;
+    userSort = k;
+    renderUsers();
+  }),
 );
 ["uSearch", "uRole", "uDept", "uStatus"].forEach(
   (id) => ($("#" + id).oninput = renderUsers),
@@ -186,12 +186,12 @@ window.cancelAppt = (n) => {
 };
 $$("[data-asort]").forEach(
   (b) =>
-    (b.onclick = () => {
-      let k = b.dataset.asort;
-      apptDir = apptSort === k ? -apptDir : 1;
-      apptSort = k;
-      renderAppts();
-    }),
+  (b.onclick = () => {
+    let k = b.dataset.asort;
+    apptDir = apptSort === k ? -apptDir : 1;
+    apptSort = k;
+    renderAppts();
+  }),
 );
 ["aSearch", "aDate", "aStatus", "aDept"].forEach(
   (i) => ($("#" + i).oninput = renderAppts),
@@ -322,10 +322,10 @@ $("#addBill").onclick = () => {
 };
 function exportCsv(rows, name) {
   let csv = rows
-      .map((r) =>
-        r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\r\n"),
+    .map((r) =>
+      r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(","),
+    )
+    .join("\r\n"),
     blob = new Blob([csv], { type: "text/csv" }),
     url = URL.createObjectURL(blob),
     a = document.createElement("a");

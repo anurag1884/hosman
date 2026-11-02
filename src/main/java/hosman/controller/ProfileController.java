@@ -3,6 +3,7 @@ package hosman.controller;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,12 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import hosman.controller.AuthController.AuthResponse;
 import hosman.entity.Account;
 import hosman.entity.Profile;
 import hosman.enums.Gender;
+import hosman.request.EditProfileRequest;
+import hosman.request.PrivilegedEditProfileRequest;
+import hosman.response.ValidationResponse;
 import hosman.service.AccountService;
 import hosman.service.ProfileService;
+import jakarta.validation.Valid;
 
 @RestController
 public class ProfileController {
@@ -31,8 +35,12 @@ public class ProfileController {
 
     }
 
-    @PostMapping("/user/edit-profile")
-    public AuthResponse editProfile(@RequestBody EditProfileRequest req,
+    //
+    // Endpoints
+    //
+
+    @PostMapping("/edit-profile")
+    public ValidationResponse editProfile(@RequestBody EditProfileRequest req,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String username = userDetails.getUsername();
@@ -40,7 +48,7 @@ public class ProfileController {
         Optional<Account> queryAcc = accService.getAccount(username);
 
         if (!queryAcc.isPresent())
-            return new AuthResponse(false, "Username '" + username + "' does not exist.");
+            return new ValidationResponse(false, "Account with username '" + username + "' does not exist.");
 
         Account acc = queryAcc.get();
 
@@ -51,10 +59,14 @@ public class ProfileController {
         if (firstName != null) {
             firstName = firstName.trim();
 
-            if (!checkName(firstName))
-                return new AuthResponse(false, "First name '" + firstName + "' is invalid.");
+            if (firstName.isEmpty())
+                profile.firstName = null;
+            else {
+                if (!checkName(firstName))
+                    return new ValidationResponse(false, "First name '" + firstName + "' is invalid.");
 
-            profile.firstName = firstName;
+                profile.firstName = firstName;
+            }
         }
 
         String middleName = req.middleName();
@@ -62,10 +74,14 @@ public class ProfileController {
         if (middleName != null) {
             middleName = middleName.trim();
 
-            if (!middleName.isEmpty() && !checkName(middleName))
-                return new AuthResponse(false, "Middle name '" + middleName + "' is invalid.");
+            if (middleName.isEmpty())
+                profile.middleName = null;
+            else {
+                if (!checkName(middleName))
+                    return new ValidationResponse(false, "Middle name '" + middleName + "' is invalid.");
 
-            profile.middleName = middleName;
+                profile.middleName = middleName;
+            }
         }
 
         String lastName = req.lastName();
@@ -73,30 +89,60 @@ public class ProfileController {
         if (lastName != null) {
             lastName = lastName.trim();
 
-            if (!checkName(lastName))
-                return new AuthResponse(false, "Last name '" + lastName + "' is invalid.");
+            if (lastName.isEmpty())
+                profile.lastName = null;
+            else {
+                if (!checkName(lastName))
+                    return new ValidationResponse(false, "Last name '" + lastName + "' is invalid.");
 
-            profile.lastName = lastName;
+                profile.lastName = lastName;
+            }
         }
 
-        Gender gender = req.gender();
+        String genderString = req.gender();
 
-        if (gender != null)
-            profile.gender = gender;
+        if (genderString != null) {
+            genderString = genderString.trim();
 
-        LocalDate dob = req.dateOfBirth();
+            if (genderString.isEmpty())
+                profile.gender = null;
+            else {
+                try {
+                    Gender gender = Gender.valueOf(genderString);
+                    profile.gender = gender;
+                } catch (IllegalArgumentException e) {
+                    return new ValidationResponse(false, "Gender '" + genderString + "' is invalid.");
+                }
+            }
+        }
 
-        if (dob != null) {
-            LocalDate now = LocalDate.now();
+        String dobString = req.dateOfBirth();
 
-            if (dob.isAfter(now))
-                return new AuthResponse(false, "Invalid DOB '" + dob.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                        + "'. Please select a proper DOB.");
+        if (dobString != null) {
+            dobString = dobString.trim();
 
-            int age = Period.between(dob, now).getYears();
+            if (dobString.isEmpty()) {
+                profile.dob = null;
+                profile.age = null;
+            } else {
+                try {
+                    LocalDate dob = LocalDate.parse(dobString);
+                    LocalDate now = LocalDate.now();
 
-            profile.dob = dob;
-            profile.age = age;
+                    if (dob.isAfter(now))
+                        return new ValidationResponse(false,
+                                "'" + dob.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                                        + "' is not a proper date of birth.");
+
+                    int age = Period.between(dob, now).getYears();
+
+                    profile.dob = dob;
+                    profile.age = age;
+                } catch (DateTimeParseException e) {
+                    return new ValidationResponse(false,
+                            "'" + dobString + "' is invalid. Please enter a valid date of birth.");
+                }
+            }
         }
 
         String email = req.email();
@@ -104,11 +150,15 @@ public class ProfileController {
         if (email != null) {
             email = email.trim();
 
-            if (!checkEmail(email))
-                return new AuthResponse(false,
-                        "Invalid email '" + email + "'. Please enter a valid email.");
+            if (email.isEmpty())
+                profile.email = null;
+            else {
+                if (!checkEmail(email))
+                    return new ValidationResponse(false,
+                            "Email '" + email + "' is invalid. Please enter a valid email.");
 
-            profile.email = email;
+                profile.email = email;
+            }
         }
 
         String phoneNumber = req.phoneNumber();
@@ -116,47 +166,65 @@ public class ProfileController {
         if (phoneNumber != null) {
             phoneNumber = phoneNumber.trim();
 
-            if (!checkPhoneNumber(phoneNumber))
-                return new AuthResponse(false,
-                        "Invalid phone number '" + phoneNumber + "'. Please enter a valid phone number.");
+            if (phoneNumber.isEmpty())
+                profile.phoneNumber = null;
+            else {
+                if (!checkPhoneNumber(phoneNumber))
+                    return new ValidationResponse(false,
+                            "Phone number '" + phoneNumber + "' is invalid. Please enter a valid phone number.");
 
-            profile.phoneNumber = phoneNumber;
+                profile.phoneNumber = phoneNumber;
+            }
         }
 
         profileService.saveProfile(profile);
 
-        return new AuthResponse(true, "SUCCESS");
+        return new ValidationResponse(true, "SUCCESS");
+
+    }
+
+    @PostMapping
+    public ValidationResponse privilegedEditProfile(@Valid @RequestBody PrivilegedEditProfileRequest req) {
+        return new ValidationResponse(true, "SUCCESS");
+    }
+
+    @PostMapping("/change-username")
+    public ValidationResponse changeUsername(@RequestBody String newUsername, @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (!checkUsername(newUsername))
+            return new ValidationResponse(false, "Username '" + newUsername + "' is invalid.");
+
+        String username = userDetails.getUsername();
+
+        if (accService.setNewUsername(username, newUsername) == null)
+            return new ValidationResponse(false, "Account with username '" + username + "' does not exist.");
+
+        return new ValidationResponse(true, "SUCCESS");
+
+    }
+
+    // Static methods
+
+    public static boolean checkUsername(String username) {
+
+        return username.matches("[a-zA-Z][a-zA-Z0-9]*");
 
     }
 
     //
     // Private methods
     //
-    private boolean checkName(String name) {
+
+    private static boolean checkName(String name) {
         return name.matches("[a-zA-Z]+(?:[ '-][a-zA-Z]+)*");
     }
 
-    private boolean checkEmail(String email) {
+    private static boolean checkEmail(String email) {
         return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z]{2,}");
     }
 
-    private boolean checkPhoneNumber(String phoneNumber) {
+    private static boolean checkPhoneNumber(String phoneNumber) {
         return phoneNumber.matches("\\+?[0-9 ()-]{7,20}");
-    }
-
-    //
-    // Records
-    //
-
-    public record EditProfileRequest(
-            String firstName,
-            String middleName,
-            String lastName,
-            Gender gender,
-            LocalDate dateOfBirth,
-            String address,
-            String email,
-            String phoneNumber) {
     }
 
 }

@@ -32,22 +32,15 @@ public class Patient {
 
     }
 
-    public Patient(Account account, String bloodGroup) {
-
-        this.account = account;
-        this.bloodGroup = bloodGroup;
-
-    }
-
     public Long getId() {
 
-        return this.id;
+        return id;
 
     }
 
     public Account getAccount() {
 
-        return this.account;
+        return account;
 
     }
 

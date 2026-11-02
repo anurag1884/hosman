@@ -8,6 +8,8 @@ import hosman.entity.Nurse;
 
 public interface NurseRepository extends JpaRepository<Nurse, Long> {
 
-    Optional<Nurse> findByAccountUsername(String username);
+    Optional<Nurse> findByAccountId(Long id);
+
+    // Optional<Nurse> findByAccountUsername(String username);
 
 }
