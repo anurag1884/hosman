@@ -281,14 +281,38 @@ registerForm.addEventListener("submit", async (event) => {
   if (!validateForm(registerForm)) return;
 
   const details = Object.fromEntries(new FormData(registerForm));
-  if (["male", "female", "other"].includes(details.gender.trim().toLowerCase())) {
-    details.gender = details.gender.trim().toUpperCase();
+  details.gender = details.gender.trim().toUpperCase();
+  switch (details.bloodGroup.trim().toUpperCase()) {
+    case "AB+":
+      details.bloodGroup = "AB_POS";
+      break;
+    case "AB-":
+      details.bloodGroup = "AB_NEG";
+      break;
+    case "A+":
+      details.bloodGroup = "A_POS";
+      break;
+    case "A-":
+      details.bloodGroup = "A_NEG";
+      break;
+    case "B+":
+      details.bloodGroup = "B_POS";
+      break;
+    case "B-":
+      details.bloodGroup = "B_NEG";
+      break;
+    case "O+":
+      details.bloodGroup = "O_POS";
+      break;
+    case "O-":
+      details.bloodGroup = "O_NEG";
+      break;
   }
-  details.bloodGroup = details.bloodGroup.trim().toUpperCase();
 
   // Keep optional safety fields clean if left blank
   if (!details.emergencyContactName?.trim()) delete details.emergencyContactName;
   if (!details.emergencyContactRelation?.trim()) delete details.emergencyContactRelation;
+  else details.emergencyContactRelation = details.emergencyContactRelation.toUpperCase();
   if (!details.emergencyContactPhone?.trim()) delete details.emergencyContactPhone;
   if (!details.allergies?.trim()) delete details.allergies;
 

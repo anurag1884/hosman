@@ -82,6 +82,10 @@ public class SecurityConfig {
                                         .requestMatchers("/receptionist/**")
                                         .hasRole("RECEPTIONIST")
 
+                                        // Pharmacist-only endpoints
+                                        .requestMatchers("/pharmacist/**")
+                                        .hasRole("PHARMACIST")
+
                                         // Patient-only endpoints
                                         .requestMatchers("/patient/**")
                                         .hasRole("PATIENT")

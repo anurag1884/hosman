@@ -7,6 +7,10 @@ import hosman.entity.roles.Doctor;
 import hosman.entity.roles.Patient;
 import hosman.enums.Role;
 import hosman.repo.AccountRepository;
+import hosman.service.roles.DoctorService;
+import hosman.service.roles.NurseService;
+import hosman.service.roles.PatientService;
+import hosman.service.roles.ReceptionistService;
 import java.util.List;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,8 +26,6 @@ public class AccountService implements UserDetailsService {
 
     private final AccountRepository accRepo;
 
-    private final ProfileService profileService;
-
     private final DoctorService docService;
     private final NurseService nurseService;
     private final ReceptionistService recepService;
@@ -34,7 +36,6 @@ public class AccountService implements UserDetailsService {
     public AccountService(
             PasswordEncoder encoder,
             AccountRepository accRepo,
-            ProfileService profileService,
             DoctorService docService,
             NurseService nurseService,
             ReceptionistService recepService,
@@ -44,8 +45,6 @@ public class AccountService implements UserDetailsService {
         this.encoder = encoder;
 
         this.accRepo = accRepo;
-
-        this.profileService = profileService;
 
         this.docService = docService;
         this.nurseService = nurseService;
@@ -118,14 +117,12 @@ public class AccountService implements UserDetailsService {
 
     public void deleteAccount(Account acc) {
 
-        profileService.deleteProfile(profileService.getProfile(acc));
-
         List<Appointment> appoints = null;
         switch (acc.role) {
             case DOCTOR -> {
-                Doctor doctor = docService.getDoctor(acc);
-                appoints = appointService.getAppointmentByDoctor(doctor);
-                docService.deleteDoctor(doctor);
+                Doctor doc = docService.getDoctor(acc);
+                appoints = appointService.getAppointmentByDoctor(doc);
+                docService.deleteDoctor(doc);
             }
             case NURSE -> {
                 nurseService.deleteNurse(nurseService.getNurse(acc));
@@ -134,9 +131,9 @@ public class AccountService implements UserDetailsService {
                 recepService.deleteReceptionist(recepService.getReceptionist(acc));
             }
             case PATIENT -> {
-                Patient patient = patService.getPatient(acc);
-                appoints = appointService.getAppointmentByPatient(patient);
-                patService.deletePatient(patient);
+                Patient pat = patService.getPatient(acc);
+                appoints = appointService.getAppointmentByPatient(pat);
+                patService.deletePatient(pat);
             }
             default -> {}
         }

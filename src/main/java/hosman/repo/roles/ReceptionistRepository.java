@@ -1,5 +1,5 @@
 /* (C)2026 */
-package hosman.repo;
+package hosman.repo.roles;
 
 import hosman.entity.roles.Receptionist;
 import java.util.Optional;

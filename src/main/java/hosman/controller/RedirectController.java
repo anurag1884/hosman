@@ -26,6 +26,7 @@ public class RedirectController {
             if (hasRole(auth, "DOCTOR")) return "forward:/doctor/index.html";
             if (hasRole(auth, "NURSE")) return "forward:/nurse/index.html";
             if (hasRole(auth, "RECEPTIONIST")) return "forward:/receptionist/index.html";
+            if (hasRole(auth, "PHARMACIST")) return "forward:/pharmacist/index.html";
             if (hasRole(auth, "PATIENT")) return "forward:/patient/index.html";
         }
 

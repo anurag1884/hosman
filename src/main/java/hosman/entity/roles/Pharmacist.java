@@ -2,23 +2,19 @@
 package hosman.entity.roles;
 
 import hosman.entity.Account;
+import hosman.entity.Profile;
+import hosman.request.profile.EditProfileRequest;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "pharmacists")
-public class Pharmacist {
+public class Pharmacist extends Profile {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
 
@@ -35,6 +31,15 @@ public class Pharmacist {
     public Pharmacist(Account account) {
 
         this.account = account;
+    }
+
+    @Override
+    public void updateProfile(EditProfileRequest req) throws IllegalArgumentException {
+        super.updateProfile(req);
+
+        qualification = req.qualification();
+
+        yearsOfExperience = req.yearsOfExperience();
     }
 
     public Long getId() {

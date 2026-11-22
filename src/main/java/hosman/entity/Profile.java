@@ -1,33 +1,22 @@
 /* (C)2026 */
 package hosman.entity;
 
-import jakarta.persistence.Entity;
+import hosman.enums.Gender;
+import hosman.request.profile.EditProfileRequest;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import hosman.enums.EmergencyContactRelation;
-import hosman.enums.Gender;
-import hosman.request.profile.EditProfileRequest;
-import hosman.service.ProfileService;
-
-@Entity
-@Table(name = "profiles")
-public class Profile {
+@MappedSuperclass
+public abstract class Profile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "account_id", nullable = false, unique = true)
-    private Account account;
+    protected Long id;
 
     public String firstName;
 
@@ -48,80 +37,43 @@ public class Profile {
     // No-argument constructor required by JPA
     protected Profile() {}
 
-    public Profile(Account account) {
-
-        this.account = account;
-    }
-
     public void updateProfile(EditProfileRequest req) throws IllegalArgumentException {
 
         String firstName = req.firstName().trim();
 
-        // if (firstName != null) {
-        // firstName = firstName.trim();
-
-        // if (firstName.isEmpty()) firstName = null;
-        // else {
-        if (!ProfileService.checkName(firstName))
+        if (!checkName(firstName))
             throw new IllegalArgumentException("First name '" + firstName + "' is invalid.");
 
         this.firstName = firstName;
-        // }
-        // }
 
         String middleName = req.middleName().trim();
 
-        // if (middleName != null) {
-        // middleName = middleName.trim();
-
         if (middleName.isEmpty()) middleName = null;
         else {
-            if (!ProfileService.checkName(middleName))
+            if (!checkName(middleName))
                 throw new IllegalArgumentException("Middle name '" + middleName + "' is invalid.");
 
             this.middleName = middleName;
         }
-        // }
 
         String lastName = req.lastName().trim();
 
-        // if (lastName != null) {
-        // lastName = lastName.trim();
-
-        // if (lastName.isEmpty()) lastName = null;
-        // else {
-        if (!ProfileService.checkName(lastName))
+        if (!checkName(lastName))
             throw new IllegalArgumentException("Last name '" + lastName + "' is invalid.");
 
         this.lastName = lastName;
-        // }
-        // }
 
         String genderString = req.gender().trim();
 
-        // if (genderString != null) {
-        // genderString = genderString.trim();
-
-        // if (genderString.isEmpty()) gender = null;
-        // else {
         try {
             Gender gender = Gender.valueOf(genderString);
             this.gender = gender;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Gender '" + genderString + "' is invalid.");
         }
-        // }
-        // }
 
         String dobString = req.dob().trim();
 
-        // if (dobString != null) {
-        // dobString = dobString.trim();
-
-        // if (dobString.isEmpty()) {
-        // dob = null;
-        // age = null;
-        // } else {
         try {
             LocalDate dob = LocalDate.parse(dobString);
             LocalDate now = LocalDate.now();
@@ -137,50 +89,26 @@ public class Profile {
             throw new IllegalArgumentException(
                     "'" + dobString + "' is invalid. Please enter a valid date of birth.");
         }
-        // }
-        // }
 
         String email = req.email().trim();
 
-        // if (email != null) {
-        // email = email.trim();
-
-        // if (email.isEmpty()) email = null;
-        // else {
-        if (!ProfileService.checkEmail(email))
+        if (!checkEmail(email))
             throw new IllegalArgumentException(
                     "Email '" + email + "' is invalid. Please enter a valid email.");
 
         this.email = email;
-        // }
-        // }
 
         String phone = req.phone().trim();
 
-        // if (phoneNumber != null) {
-        // phoneNumber = phoneNumber.trim();
-
-        // if (phoneNumber.isEmpty()) phoneNumber = null;
-        // else {
-        if (!ProfileService.checkPhoneNumber(phone))
+        if (!checkPhoneNumber(phone))
             throw new IllegalArgumentException(
-                    "Phone number '"
-                            + phone
-                            + "' is invalid. Please enter a valid phone number.");
+                    "Phone number '" + phone + "' is invalid. Please enter a valid phone number.");
         this.phone = phone;
-        // }
-        // }
 
         String address = req.address().trim();
 
-        // if (address != null) {
-        // address = address.trim();
-
-        // if (address.isEmpty()) address = null;
-        // else
         if (address.isEmpty()) throw new IllegalArgumentException("Please enter an address.");
         this.address = address;
-        // }
     }
 
     public Long getId() {
@@ -188,8 +116,22 @@ public class Profile {
         return id;
     }
 
-    public Account getAccount() {
+    //
+    // Static methods
+    //
 
-        return account;
+    private static boolean checkName(String name) {
+
+        return name.matches("[a-zA-Z]+(?:[ '-][a-zA-Z]+)*");
+    }
+
+    private static boolean checkEmail(String email) {
+
+        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z]{2,}");
+    }
+
+    private static boolean checkPhoneNumber(String phoneNumber) {
+
+        return phoneNumber.matches("\\+?[0-9 ()-]{7,20}");
     }
 }

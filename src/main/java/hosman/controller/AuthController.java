@@ -2,10 +2,10 @@
 package hosman.controller;
 
 import hosman.entity.Account;
-import hosman.entity.Profile;
 import hosman.entity.roles.Doctor;
 import hosman.entity.roles.Nurse;
 import hosman.entity.roles.Patient;
+import hosman.entity.roles.Pharmacist;
 import hosman.entity.roles.Receptionist;
 import hosman.enums.Role;
 import hosman.repo.AccountRepository;
@@ -14,11 +14,11 @@ import hosman.request.auth.PrivilegedRegisterRequest;
 import hosman.request.auth.RegisterRequest;
 import hosman.response.ValidationResponse;
 import hosman.service.AccountService;
-import hosman.service.DoctorService;
-import hosman.service.NurseService;
-import hosman.service.PatientService;
-import hosman.service.ProfileService;
-import hosman.service.ReceptionistService;
+import hosman.service.roles.DoctorService;
+import hosman.service.roles.NurseService;
+import hosman.service.roles.PatientService;
+import hosman.service.roles.PharmacistService;
+import hosman.service.roles.ReceptionistService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -41,11 +41,11 @@ public class AuthController {
     private final SecurityContextRepository securityRepo;
 
     private final AccountService accService;
-    private final ProfileService profileService;
 
     private final DoctorService docService;
     private final NurseService nurseService;
     private final ReceptionistService recepService;
+    private final PharmacistService pharmaService;
     private final PatientService patService;
 
     public AuthController(
@@ -56,19 +56,19 @@ public class AuthController {
             DoctorService docService,
             NurseService nurseService,
             ReceptionistService recepService,
-            PatientService patService,
-            ProfileService profileService) {
+            PharmacistService pharmaService,
+            PatientService patService) {
 
         this.manager = manager;
 
         this.securityRepo = securityRepo;
 
         this.accService = accService;
-        this.profileService = profileService;
 
         this.docService = docService;
         this.nurseService = nurseService;
         this.recepService = recepService;
+        this.pharmaService = pharmaService;
         this.patService = patService;
     }
 
@@ -120,42 +120,58 @@ public class AuthController {
             @Valid @RequestBody PrivilegedRegisterRequest req) {
 
         try {
-            RegisterRequest regRequest = req.credentials();
+            RegisterRequest regReq = req.credentials();
 
-            String username = regRequest.username().trim();
+            String username = regReq.username().trim();
             if (!AccountService.checkUsername(username))
                 return new ValidationResponse(false, "Username '" + username + "' is invalid.");
             if (accService.accountExists(username))
                 return new ValidationResponse(
                         false, "Username '" + username + "' is already taken.");
 
-            String password = regRequest.password();
+            String password = regReq.password();
             if (password.length() < 8)
                 return new ValidationResponse(false, "Password is too short.");
 
             Account acc = accService.createAccount(username, password, req.role());
 
-            Profile profile = new Profile(acc);
-            try {
-                profile.updateProfile(regRequest.details());
-            } catch (IllegalArgumentException e) {
-                return new ValidationResponse(false, e.getMessage());
-            }
-
-            accService.saveAccount(acc);
-            profileService.saveProfile(profile);
-
             Role role = req.role();
             if (role == null)
                 return new ValidationResponse(false, "Role '" + role + "' is invalid.");
 
-            switch (role) {
-                case DOCTOR -> docService.saveDoctor(new Doctor(acc));
-                case NURSE -> nurseService.saveNurse(new Nurse(acc));
-                case RECEPTIONIST -> recepService.saveReceptionist(new Receptionist(acc));
-                case PATIENT -> patService.savePatient(new Patient(acc));
-                default -> {}
+            try {
+                switch (role) {
+                    case DOCTOR -> {
+                        Doctor doc = new Doctor(acc);
+                        doc.updateProfile(regReq.details());
+                        docService.saveDoctor(doc);
+                    }
+                    case NURSE -> {
+                        Nurse nurse = new Nurse(acc);
+                        nurse.updateProfile(regReq.details());
+                        nurseService.saveNurse(nurse);
+                    }
+                    case RECEPTIONIST -> {
+                        Receptionist recep = new Receptionist(acc);
+                        recep.updateProfile(regReq.details());
+                        recepService.saveReceptionist(recep);
+                    }
+                    case PHARMACIST -> {
+                        Pharmacist pharma = new Pharmacist(acc);
+                        pharma.updateProfile(regReq.details());
+                        pharmaService.savePharmacist(pharma);
+                    }
+                    case PATIENT -> {
+                        Patient pat = new Patient(acc);
+                        pat.updateProfile(regReq.details());
+                        patService.savePatient(pat);
+                    }
+                    default -> {}
+                }
+            } catch (IllegalArgumentException e) {
+                return new ValidationResponse(false, e.getMessage());
             }
+
         } catch (NullPointerException e) {
             return new ValidationResponse(false, "Malformed request sent.");
         }

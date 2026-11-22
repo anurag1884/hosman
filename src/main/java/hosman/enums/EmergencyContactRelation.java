@@ -1,7 +1,7 @@
+/* (C)2026 */
 package hosman.enums;
 
 public enum EmergencyContactRelation {
-    
     SPOUSE,
     PARENT,
     GUARDIAN,
@@ -9,5 +9,4 @@ public enum EmergencyContactRelation {
     CHILD,
     FRIEND,
     OTHER
-
 }
