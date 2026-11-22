@@ -1,16 +1,18 @@
+/* (C)2026 */
 package hosman.entity;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import hosman.entity.roles.Doctor;
+import hosman.entity.roles.Nurse;
+import hosman.entity.roles.Patient;
+import hosman.enums.AppointmentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-
-import hosman.enums.AppointmentStatus;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointments")
@@ -20,14 +22,11 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Patient patient;
+    @ManyToOne private Patient patient;
 
-    @ManyToOne
-    private Doctor doctor;
+    @ManyToOne private Doctor doctor;
 
-    @ManyToOne
-    private Nurse nurse;
+    @ManyToOne private Nurse nurse;
 
     @Column(nullable = false)
     public String description;
@@ -39,10 +38,14 @@ public class Appointment {
     public AppointmentStatus status;
 
     // No-argument constructor required by JPA
-    protected Appointment() {
-    }
+    protected Appointment() {}
 
-    public Appointment(Patient patient, Doctor doctor, Nurse nurse, String description, LocalDateTime appointmentTime,
+    public Appointment(
+            Patient patient,
+            Doctor doctor,
+            Nurse nurse,
+            String description,
+            LocalDateTime appointmentTime,
             AppointmentStatus status) {
 
         this.patient = patient;
@@ -51,25 +54,20 @@ public class Appointment {
         this.description = description;
         this.appointmentTime = appointmentTime;
         this.status = status;
-
     }
 
     public Long getId() {
 
         return id;
-
     }
 
     public Patient getPatient() {
 
         return patient;
-
     }
 
     public Doctor getDoctor() {
 
         return doctor;
-
     }
-
 }

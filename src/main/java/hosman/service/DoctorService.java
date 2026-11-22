@@ -1,10 +1,10 @@
+/* (C)2026 */
 package hosman.service;
 
-import org.springframework.stereotype.Service;
-
 import hosman.entity.Account;
-import hosman.entity.Doctor;
+import hosman.entity.roles.Doctor;
 import hosman.repo.DoctorRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DoctorService {
@@ -14,25 +14,20 @@ public class DoctorService {
     public DoctorService(DoctorRepository repo) {
 
         this.docRepo = repo;
-
     }
 
     public Doctor getDoctor(Account acc) {
 
         return docRepo.findByAccountId(acc.getId()).get();
-
     }
 
     public Doctor saveDoctor(Doctor doctor) {
 
         return docRepo.save(doctor);
-
     }
 
     public void deleteDoctor(Doctor doctor) {
 
         docRepo.delete(doctor);
-
     }
-
 }

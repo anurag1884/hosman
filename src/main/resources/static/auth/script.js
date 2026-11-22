@@ -1,109 +1,344 @@
-const tabs = [...document.querySelectorAll(".tab")];
-const sections = [...document.querySelectorAll(".form-section")];
 
-async function sendRequest(url, request) {
-    const response = await fetch(url, request);
-    if (!response.ok) return null;
-    return await response.json();
-}
+/* ==========================================================
+   HMS Login & Register - Behaviour
+   Sections:
+     1. Element references
+     2. View switching & optional safety block
+     3. Editable custom select (viewport-aware positioning)
+     4. Password visibility toggle & Caps Lock warning
+     5. Validation, submit lock & backend request helpers
+     6. Form submit handlers
+     7. Init
+   ========================================================== */
 
-function showSection(name) {
+/* ---------- 1. Element references ---------- */
+const authCard = document.getElementById("authCard");
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const tabs = document.querySelectorAll(".tab");
+const panels = document.querySelectorAll(".panel");
+
+/* ---------- 2. View switching & optional safety block ---------- */
+function showView(view) {
+  authCard.dataset.view = view;
+
+  panels.forEach((panel) => {
+    panel.hidden = panel.id !== `panel-${view}`;
+  });
+
   tabs.forEach((tab) => {
-    const active = tab.id === `${name}-tab`;
-    tab.setAttribute("aria-selected", String(active));
+    const isActive = tab.dataset.switchView === view;
+    tab.classList.toggle("is-active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
   });
-  sections.forEach((section) =>
-    section.classList.toggle("active", section.id === `${name}-section`),
-  );
-  document.getElementById(`${name}-username`).focus({ preventScroll: true });
 }
 
-tabs.forEach((tab) =>
-  tab.addEventListener("click", () => showSection(tab.id.replace("-tab", ""))),
-);
-
-document.querySelectorAll("[data-switch]").forEach((link) => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    showSection(link.dataset.switch);
-  });
+document.querySelectorAll("[data-switch-view]").forEach((el) => {
+  el.addEventListener("click", () => showView(el.dataset.switchView));
 });
 
-document.querySelectorAll("[data-toggle]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const input = document.getElementById(button.dataset.toggle);
-    const visible = input.type === "password";
-    input.type = visible ? "text" : "password";
-    button.textContent = visible ? "Hide" : "Show";
-  });
+const toggleSafetyBtn = document.getElementById("toggleSafetyInfo");
+const safetySection = document.getElementById("safetyInfoSection");
+const toggleSafetyIcon = document.getElementById("toggleSafetyIcon");
+
+toggleSafetyBtn.addEventListener("click", () => {
+  const expanded = toggleSafetyBtn.getAttribute("aria-expanded") === "true";
+  toggleSafetyBtn.setAttribute("aria-expanded", String(!expanded));
+  safetySection.hidden = expanded;
+  toggleSafetyIcon.textContent = expanded ? "+" : "−";
 });
 
-document.getElementById("login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
+/* ---------- 3. Editable Custom Select ---------- */
+function initCustomSelects() {
+  const selects = document.querySelectorAll(".custom-select");
 
-  const messageElement = document.getElementById("login-message");
+  const closeAll = (except = null) => {
+    selects.forEach((sel) => {
+      if (sel !== except) sel.classList.remove("is-open");
+    });
+  };
 
-  const formData = new FormData(e.currentTarget);
+  selects.forEach((wrapper) => {
+    const input = wrapper.querySelector(".custom-select__input");
+    const toggleBtn = wrapper.querySelector(".custom-select__toggle");
+    const menu = wrapper.querySelector(".custom-select__menu");
+    const options = wrapper.dataset.options.split(",").map((s) => s.trim());
+    let activeIndex = -1;
 
-  const loginResponse = await sendRequest("/login", {
-    method: "POST",
+    const updateDirection = () => {
+      const rect = input.getBoundingClientRect();
+      const menuHeight = Math.min(menu.scrollHeight || 200, 210);
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      wrapper.classList.toggle("open-upward", spaceBelow < menuHeight && spaceAbove > spaceBelow);
+    };
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+    const renderOptions = (filterText = "") => {
+      const query = filterText.trim().toLowerCase();
+      const currentVal = input.value.trim().toLowerCase();
+      const filtered = query
+        ? options.filter((opt) => opt.toLowerCase().includes(query))
+        : options;
 
-    body: JSON.stringify({
-      username: formData.get("username"),
-      password: formData.get("password"),
-    }),
-  });
+      menu.innerHTML = "";
+      activeIndex = -1;
 
-  if (loginResponse) {
-    if (loginResponse.success) {
-      messageElement.textContent = "";
-      window.location.href = "/dashboard";
-    } else messageElement.textContent = loginResponse.message;
-  } else messageElement.textContent = "Server request failed";
-});
+      if (!filtered.length) {
+        const empty = document.createElement("li");
+        empty.className = "custom-select__empty";
+        empty.textContent = `Custom value: "${input.value.trim()}"`;
+        menu.appendChild(empty);
+        return;
+      }
 
-document
-  .getElementById("register-form")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
+      filtered.forEach((opt) => {
+        const li = document.createElement("li");
+        li.className = "custom-select__option";
+        li.setAttribute("role", "option");
+        li.textContent = opt;
+        if (opt.toLowerCase() === currentVal) li.classList.add("is-selected");
 
-    const messageElement = document.getElementById("register-message");
+        li.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          input.value = opt;
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          wrapper.classList.remove("is-open");
+        });
 
-    const formData = new FormData(e.currentTarget);
-
-    const password = formData.get("password"),
-      confirmPassword = formData.get("confirmPassword");
-
-    if (password === confirmPassword) {
-      const registerResponse = await sendRequest("/register", {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          username: formData.get("username"),
-          password: password,
-        }),
+        menu.appendChild(li);
       });
+    };
 
-      if (registerResponse) {
-        if (registerResponse.success) {
-          messageElement.textContent = "";
-          showSection("login");
-        } else messageElement.textContent = registerResponse.message;
-      } else messageElement.textContent = "Server request failed";
-    } else
-      messageElement.textContent = "Passwords do not match. Please recheck and try again...";
+    const openMenu = (showAll = false) => {
+      closeAll(wrapper);
+      renderOptions(showAll ? "" : input.value);
+      wrapper.classList.add("is-open");
+      updateDirection();
+    };
+
+    input.addEventListener("focus", () => openMenu(true));
+    input.addEventListener("input", () => {
+      renderOptions(input.value);
+      if (!wrapper.classList.contains("is-open")) wrapper.classList.add("is-open");
+      updateDirection();
+    });
+
+    toggleBtn.addEventListener("click", () => {
+      if (wrapper.classList.contains("is-open")) {
+        wrapper.classList.remove("is-open");
+      } else {
+        input.focus();
+        openMenu(true);
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const items = menu.querySelectorAll(".custom-select__option");
+      if (!items.length) return;
+
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!wrapper.classList.contains("is-open")) openMenu(true);
+        activeIndex = e.key === "ArrowDown"
+          ? (activeIndex + 1) % items.length
+          : (activeIndex - 1 + items.length) % items.length;
+        items.forEach((el, idx) => el.classList.toggle("is-highlighted", idx === activeIndex));
+        items[activeIndex].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "Enter" && wrapper.classList.contains("is-open") && activeIndex >= 0) {
+        e.preventDefault();
+        items[activeIndex].dispatchEvent(new Event("mousedown"));
+      } else if (e.key === "Escape") {
+        wrapper.classList.remove("is-open");
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (wrapper.classList.contains("is-open")) updateDirection();
+    }, { passive: true });
   });
 
-// document.getElementById("forgot-link").addEventListener("click", (event) => {
-//   event.preventDefault();
-//   document.getElementById("login-message").textContent =
-//     "Password reset flow can be connected here.";
-// });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".custom-select")) closeAll();
+  });
+}
+
+/* ---------- 4. Password visibility toggle & Caps Lock warning ---------- */
+function togglePasswordVisibility(button) {
+  const input = button.parentElement.querySelector("input");
+  const willShow = input.type === "password";
+
+  input.type = willShow ? "text" : "password";
+  button.classList.toggle("is-visible", willShow);
+  button.setAttribute("aria-pressed", String(willShow));
+  button.setAttribute("aria-label", willShow ? "Hide password" : "Show password");
+}
+
+document.querySelectorAll(".toggle-password").forEach((button) => {
+  button.addEventListener("click", () => togglePasswordVisibility(button));
+});
+
+document.querySelectorAll(".password-field input").forEach((input) => {
+  const warningEl = input.closest(".field").querySelector("[data-caps-warning]");
+  if (!warningEl) return;
+
+  const syncCaps = (e) => {
+    if (typeof e.getModifierState === "function") {
+      warningEl.hidden = !e.getModifierState("CapsLock");
+    }
+  };
+
+  input.addEventListener("keydown", syncCaps);
+  input.addEventListener("keyup", syncCaps);
+  input.addEventListener("blur", () => { warningEl.hidden = true; });
+});
+
+/* ---------- 5. Validation, submit lock & backend request helpers ---------- */
+function setMessage(form, text, isSuccess = false) {
+  const messageEl = form.querySelector(".form-message");
+  messageEl.textContent = text;
+  messageEl.classList.toggle("is-success", isSuccess);
+}
+
+function setSubmitting(form, isSubmitting) {
+  const btn = form.querySelector('button[type="submit"]');
+  const labelSpan = btn.querySelector("span");
+  btn.disabled = isSubmitting;
+  if (labelSpan) {
+    labelSpan.textContent = isSubmitting
+      ? (btn.dataset.loadingLabel || "Submitting...")
+      : (btn.dataset.defaultLabel || "Submit");
+  }
+}
+
+function checkPasswordsMatch() {
+  const password = registerForm.elements.password;
+  const confirm = registerForm.elements.confirmPassword;
+  const mismatch = confirm.value !== "" && password.value !== confirm.value;
+
+  confirm.setCustomValidity(mismatch ? "Passwords do not match." : "");
+}
+
+function validateForm(form) {
+  form.classList.add("was-validated");
+
+  if (form.checkValidity()) {
+    setMessage(form, "");
+    return true;
+  }
+
+  const firstInvalid = form.querySelector(":invalid");
+  setMessage(form, firstInvalid.validationMessage || "Please fill in all required fields.");
+  firstInvalid.focus();
+  return false;
+}
+
+// [BACKEND HOOK] Centralized JSON API dispatcher
+async function sendRequest(url, request) {
+  const response = await fetch(url, request);
+  if (!response.ok) return null;
+  return await response.json();
+}
+
+registerForm.elements.password.addEventListener("input", checkPasswordsMatch);
+registerForm.elements.confirmPassword.addEventListener("input", checkPasswordsMatch);
+
+/* ---------- 6. Form submit handlers ---------- */
+// [BACKEND HOOK] POST /login
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!validateForm(loginForm)) return;
+
+  setSubmitting(loginForm, true);
+  try {
+    const loginResponse = await sendRequest("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(new FormData(loginForm))),
+    });
+
+    if (loginResponse) {
+      if (loginResponse.success) {
+        setMessage(loginForm, "");
+        window.location.href = "/dashboard";
+      } else {
+        setMessage(loginForm, loginResponse.message, false);
+        setSubmitting(loginForm, false);
+      }
+    } else {
+      setMessage(loginForm, "Server request failed", false);
+      setSubmitting(loginForm, false);
+    }
+  } catch {
+    setMessage(loginForm, "Network error. Please try again.", false);
+    setSubmitting(loginForm, false);
+  }
+});
+
+// [BACKEND HOOK] POST /register
+registerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  checkPasswordsMatch();
+  if (!validateForm(registerForm)) return;
+
+  const details = Object.fromEntries(new FormData(registerForm));
+  if (["male", "female", "other"].includes(details.gender.trim().toLowerCase())) {
+    details.gender = details.gender.trim().toUpperCase();
+  }
+  details.bloodGroup = details.bloodGroup.trim().toUpperCase();
+
+  // Keep optional safety fields clean if left blank
+  if (!details.emergencyContactName?.trim()) delete details.emergencyContactName;
+  if (!details.emergencyContactRelation?.trim()) delete details.emergencyContactRelation;
+  if (!details.emergencyContactPhone?.trim()) delete details.emergencyContactPhone;
+  if (!details.allergies?.trim()) delete details.allergies;
+
+  const regReq = {
+    username: details.username,
+    password: details.password,
+    details: details
+  };
+  delete details.username;
+  delete details.password;
+  delete details.confirmPassword;
+
+  console.log(regReq);
+
+  setSubmitting(registerForm, true);
+  try {
+    const registerResponse = await sendRequest("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(regReq),
+    });
+
+    if (registerResponse) {
+      if (registerResponse.success) {
+        setMessage(loginForm, "Account created! Please sign in.", true);
+        registerForm.reset();
+        registerForm.classList.remove("was-validated");
+        safetySection.hidden = true;
+        toggleSafetyBtn.setAttribute("aria-expanded", "false");
+        toggleSafetyIcon.textContent = "+";
+        showView("login");
+      } else {
+        setMessage(registerForm, registerResponse.message, false);
+      }
+    } else {
+      setMessage(registerForm, "Server request failed", false);
+    }
+  } catch {
+    setMessage(registerForm, "Network error. Please try again.", false);
+  } finally {
+    setSubmitting(registerForm, false);
+  }
+});
+
+/* ---------- 7. Init ---------- */
+function limitDateOfBirth() {
+  const today = new Date().toISOString().split("T")[0];
+  registerForm.elements.dob.max = today;
+}
+
+limitDateOfBirth();
+initCustomSelects();
+showView("login");

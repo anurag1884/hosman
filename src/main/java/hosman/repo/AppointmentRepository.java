@@ -1,10 +1,9 @@
+/* (C)2026 */
 package hosman.repo;
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import hosman.entity.Appointment;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
@@ -22,5 +21,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     //         String patientUsername, String doctorUsername);
 
     // List<Appointment> findByStatus(String status);
-
 }

@@ -1,16 +1,18 @@
-package hosman.entity;
+/* (C)2026 */
+package hosman.entity.roles;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import hosman.entity.Account;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "receptionists")
-public class Receptionist {
+@Table(name = "doctors")
+public class Doctor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,26 +22,32 @@ public class Receptionist {
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
 
-    // No-argument constructor required by JPA
-    protected Receptionist() {
-    }
+    public String department;
 
-    public Receptionist(Account account) {
+    public String qualification;
+
+    public String specialization;
+
+    public Integer yearsOfExperience;
+
+    // @Column(nullable = false)
+    // public boolean isAvailable;
+
+    // No-argument constructor required by JPA
+    protected Doctor() {}
+
+    public Doctor(Account account) {
 
         this.account = account;
-
     }
 
     public Long getId() {
 
         return id;
-
     }
 
     public Account getAccount() {
 
         return account;
-
     }
-
 }

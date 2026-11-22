@@ -1,3 +1,4 @@
+/* (C)2026 */
 package hosman;
 
 import org.springframework.boot.SpringApplication;
@@ -9,7 +10,5 @@ public class HosmanApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(HosmanApplication.class, args);
-
     }
-
 }

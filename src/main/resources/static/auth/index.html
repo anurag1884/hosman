@@ -1,123 +1,281 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Authentication - Hosman</title>
-  <link rel="stylesheet" type="text/css" href="auth/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hosman | Login &amp; Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  
+  <link rel="stylesheet" href="auth/style.css">
 </head>
 
 <body>
-  <main class="auth-shell">
-    <div class="auth-main">
-      <div class="brand"><span class="brand-mark">✦</span> Hosman</div>
 
-      <div class="tabs" role="tablist" aria-label="Account access">
-        <button class="tab" id="login-tab" role="tab" aria-selected="true" aria-controls="login-section">
-          Login
-        </button>
-        <button class="tab" id="register-tab" role="tab" aria-selected="false" aria-controls="register-section">
-          Register
-        </button>
+  <div class="bg-decor" aria-hidden="true">
+    <span class="bg-orb bg-orb--teal"></span>
+    <span class="bg-orb bg-orb--mint"></span>
+  </div>
+
+  <main class="auth-card" id="authCard" data-view="login">
+
+    <!-- ===== Header ===== -->
+    <header class="auth-header">
+      <div class="brand-mark" aria-hidden="true">
+        <svg class="brand-cross" viewBox="0 0 24 24" role="img" aria-hidden="true">
+          <path d="M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5V3z" />
+        </svg>
       </div>
+      <div class="brand-text">
+        <span class="brand-eyebrow">Hosman Portal</span>
+        <h1>Unnamed Hospital</h1>
+      </div>
+    </header>
 
-      <section class="form-section active" id="login-section" aria-labelledby="login-title">
-        <h1 id="login-title">Welcome back</h1>
-        <p class="subtitle">Please sign in to continue.</p>
-        <form id="login-form">
-          <label for="login-username">Username</label>
-          <input id="login-username" name="username" autocomplete="username" placeholder="Enter your username"
-            required />
-          <label for="login-password">Password</label>
-          <div class="field">
-            <input id="login-password" name="password" type="password" autocomplete="current-password"
-              placeholder="Enter your password" required />
-            <button class="password-toggle" type="button" data-toggle="login-password">
-              Show
-            </button>
-          </div>
-          <!-- <div class="form-row">
-              <label class="check"
-                ><input type="checkbox" name="remember" /> Remember me</label
-              >
-              <a href="#" id="forgot-link">Forgot password?</a>
-            </div> -->
-          <button class="submit" type="submit">Sign in</button>
-          <p class="message" id="login-message" aria-live="polite"></p>
-        </form>
-        <p class="switch-copy">
-          New here? <a href="#" data-switch="register">Create an account</a>
-        </p>
-      </section>
-
-      <section class="form-section" id="register-section" aria-labelledby="register-title">
-        <h1 id="register-title">Create account</h1>
-        <p class="subtitle">Start your workspace in a few simple steps.</p>
-        <form id="register-form">
-          <label for="register-username">Username</label>
-          <input id="register-username" name="username" autocomplete="username" minlength="3"
-            placeholder="Choose a username" required />
-          <label for="register-password">Password</label>
-          <div class="field">
-            <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8"
-              placeholder="Create a password (8+ characters)" required />
-            <button class="password-toggle" type="button" data-toggle="register-password">
-              Show
-            </button>
-          </div>
-          <label for="confirm-password">Confirm password</label>
-          <div class="field">
-            <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password"
-              minlength="8" placeholder="Enter password again" required />
-            <button class="password-toggle" type="button" data-toggle="confirm-password">
-              Show
-            </button>
-          </div>
-          <!-- <div class="form-row">
-              <label class="check"
-                ><input id="terms" type="checkbox" required /> I agree to terms
-                of use</label
-              >
-            </div> -->
-          <button class="submit" type="submit">Create account</button>
-          <p class="message" id="register-message" aria-live="polite"></p>
-        </form>
-        <p class="switch-copy">
-          Already have an account? <a href="#" data-switch="login">Sign in</a>
-        </p>
-      </section>
+    <!-- ===== Tabs ===== -->
+    <div class="tabs" role="tablist" aria-label="Authentication">
+      <button type="button" class="tab is-active" role="tab" id="tab-login" aria-selected="true"
+        aria-controls="panel-login" data-switch-view="login">Login</button>
+      <button type="button" class="tab" role="tab" id="tab-register" aria-selected="false"
+        aria-controls="panel-register" data-switch-view="register">Register</button>
     </div>
 
-    <aside class="auth-banner" aria-label="Welcome banner">
-      <div class="art" aria-hidden="true">
-        <div class="orb one"></div>
-        <div class="orb two"></div>
-        <div class="dashboard">
-          <div class="dash-top"><i></i><i></i><i></i></div>
-          <div class="dash-lines">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="dash-chart"><i></i><i></i><i></i><i></i><i></i></div>
+    <!-- ===== LOGIN PANEL ===== -->
+    <section class="panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+      <form id="loginForm" class="form-grid" novalidate>
+
+        <div class="field field--full">
+          <label for="loginUsername">Username <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="loginUsername" name="username" autocomplete="username" placeholder="Enter username..."
+            required>
         </div>
-      </div>
-      <div class="banner-tag">An Interactive Hospital Management System</div>
-      <div class="banner-copy">
-        <h2>Managing medical appointments.<br />Simplified.</h2>
-        <p>
-          A unified interactive dashboard for hospitals in tracking patient appointments and billings.
-        </p>
-      </div>
-      <div class="banner-foot">
-        <!-- <div class="avatars" aria-hidden="true">
-            <span></span><span></span><span></span>
+
+        <div class="field field--full">
+          <label for="loginPassword">Password <span class="required" aria-hidden="true">*</span></label>
+          <div class="password-field">
+            <input type="password" id="loginPassword" name="password" autocomplete="current-password"
+              placeholder="Enter password..." required>
+            <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
+              <svg class="icon icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg class="icon icon-eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-7 0-11-7-11-7a19.8 19.8 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a19.7 19.7 0 0 1-3.17 4.19M14.12 14.12A3 3 0 1 1 9.88 9.88M1 1l22 22" />
+              </svg>
+            </button>
           </div>
-          <span>Trusted by teams moving forward</span> -->
-      </div>
-    </aside>
+          <p class="caps-warning" data-caps-warning hidden>Caps Lock is on</p>
+        </div>
+
+        <p class="form-message field--full" role="alert" aria-live="polite"></p>
+
+        <div class="field field--full">
+          <button type="submit" class="btn-primary" data-default-label="Sign In" data-loading-label="Signing in...">
+            <span>Sign In</span>
+            <svg class="btn-arrow" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4.5 10h11m0 0-4-4m4 4-4 4" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="switch-text field--full">
+          Don't have an account yet?
+          <button type="button" class="link-button" data-switch-view="register">Register here</button>
+        </p>
+      </form>
+    </section>
+
+    <!-- ===== REGISTER PANEL ===== -->
+    <section class="panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+      <form id="registerForm" class="form-grid" novalidate>
+
+        <!-- Category 1: Personal & Clinical Identity -->
+        <div class="form-category">Personal &amp; Clinical Details</div>
+
+        <div class="field field--third">
+          <label for="firstName">First name <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="John" required>
+        </div>
+
+        <div class="field field--third">
+          <label for="middleName">Middle name</label>
+          <input type="text" id="middleName" name="middleName" autocomplete="additional-name" placeholder="Michael">
+        </div>
+
+        <div class="field field--third">
+          <label for="lastName">Last name <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Doe" required>
+        </div>
+
+        <div class="field field--third">
+          <label for="dob">Date of birth <span class="required" aria-hidden="true">*</span></label>
+          <input type="date" id="dob" name="dob" autocomplete="bday" required>
+        </div>
+
+        <div class="field field--third">
+          <label for="gender">Gender <span class="required" aria-hidden="true">*</span></label>
+          <div class="custom-select" data-options="Male,Female,Other">
+            <input type="text" id="gender" name="gender" class="custom-select__input"
+              placeholder="Select or type..." autocomplete="off" required>
+            <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle gender options">
+              <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <ul class="custom-select__menu" role="listbox"></ul>
+          </div>
+        </div>
+
+        <div class="field field--third">
+          <label for="bloodGroup">Blood group <span class="required" aria-hidden="true">*</span></label>
+          <div class="custom-select" data-options="A+,A-,B+,B-,AB+,AB-,O+,O-">
+            <input type="text" id="bloodGroup" name="bloodGroup" class="custom-select__input"
+              placeholder="Select or type (e.g. O+)..." autocomplete="off" required>
+            <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle blood group options">
+              <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <ul class="custom-select__menu" role="listbox"></ul>
+          </div>
+        </div>
+
+        <!-- Category 2: Contact & Location -->
+        <div class="form-category">Contact Information</div>
+
+        <div class="field field--half">
+          <label for="email">E-mail <span class="required" aria-hidden="true">*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="name@example.com" required>
+        </div>
+
+        <div class="field field--half">
+          <label for="phone">Phone number <span class="required" aria-hidden="true">*</span></label>
+          <input type="tel" id="phone" name="phoneNumber" autocomplete="tel" placeholder="Enter valid phone number..."
+            required>
+        </div>
+
+        <div class="field field--full">
+          <label for="address">Address <span class="required" aria-hidden="true">*</span></label>
+          <textarea id="address" name="address" rows="2" autocomplete="street-address"
+            placeholder="Street address, city, postal code" required></textarea>
+        </div>
+
+        <!-- Optional Safety Block: Emergency Contact & Critical Allergies -->
+        <div class="optional-toggle-bar">
+          <button type="button" class="optional-toggle-btn" id="toggleSafetyInfo" aria-expanded="false"
+            aria-controls="safetyInfoSection">
+            <span id="toggleSafetyIcon">+</span>
+            <span>Add Emergency Contact &amp; Critical Allergies</span>
+          </button>
+          <span class="optional-hint">Optional • Helpful for urgent care</span>
+        </div>
+
+        <div class="optional-section" id="safetyInfoSection" hidden>
+          <div class="field field--third">
+            <label for="emergencyName">Emergency contact name</label>
+            <input type="text" id="emergencyName" name="emergencyContactName" placeholder="Jane Doe">
+          </div>
+
+          <div class="field field--third">
+            <label for="emergencyRelation">Relation</label>
+            <div class="custom-select" data-options="Spouse,Parent,Guardian,Sibling,Child,Friend,Other">
+              <input type="text" id="emergencyRelation" name="emergencyContactRelation" class="custom-select__input"
+                placeholder="Select or type relation..." autocomplete="off">
+              <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle relation options">
+                <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <ul class="custom-select__menu" role="listbox"></ul>
+            </div>
+          </div>
+
+          <div class="field field--third">
+            <label for="emergencyPhone">Emergency contact phone</label>
+            <input type="tel" id="emergencyPhone" name="emergencyContactPhone" autocomplete="tel"
+              placeholder="Emergency phone number">
+          </div>
+
+          <div class="field field--full">
+            <label for="allergies">Critical allergies</label>
+            <input type="text" id="allergies" name="allergies" placeholder="e.g. Penicillin, Peanuts, Latex, None">
+          </div>
+        </div>
+
+        <!-- Category 3: Account Credentials -->
+        <div class="form-category">Account Credentials</div>
+
+        <div class="field field--third">
+          <label for="regUsername">Username <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="regUsername" name="username" autocomplete="username" minlength="4"
+            placeholder="Min. 4 characters" required>
+        </div>
+
+        <div class="field field--third">
+          <label for="regPassword">Password <span class="required" aria-hidden="true">*</span></label>
+          <div class="password-field">
+            <input type="password" id="regPassword" name="password" autocomplete="new-password" minlength="8"
+              placeholder="Min. 8 characters" required>
+            <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
+              <svg class="icon icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg class="icon icon-eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-7 0-11-7-11-7a19.8 19.8 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a19.7 19.7 0 0 1-3.17 4.19M14.12 14.12A3 3 0 1 1 9.88 9.88M1 1l22 22" />
+              </svg>
+            </button>
+          </div>
+          <p class="caps-warning" data-caps-warning hidden>Caps Lock is on</p>
+        </div>
+
+        <div class="field field--third">
+          <label for="confirmPassword">Confirm password <span class="required" aria-hidden="true">*</span></label>
+          <div class="password-field">
+            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password"
+              placeholder="Re-enter password" required>
+            <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
+              <svg class="icon icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg class="icon icon-eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-7 0-11-7-11-7a19.8 19.8 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a19.7 19.7 0 0 1-3.17 4.19M14.12 14.12A3 3 0 1 1 9.88 9.88M1 1l22 22" />
+              </svg>
+            </button>
+          </div>
+          <p class="caps-warning" data-caps-warning hidden>Caps Lock is on</p>
+        </div>
+
+        <p class="form-message field--full" role="alert" aria-live="polite"></p>
+
+        <div class="field field--full">
+          <button type="submit" class="btn-primary" data-default-label="Create Account"
+            data-loading-label="Creating account...">
+            <span>Create Account</span>
+            <svg class="btn-arrow" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4.5 10h11m0 0-4-4m4 4-4 4" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="switch-text field--full">
+          Already have an account?
+          <button type="button" class="link-button" data-switch-view="login">Login here</button>
+        </p>
+      </form>
+    </section>
+
   </main>
 
-  <script type="text/javascript" src="auth/script.js"></script>
+  <script src="auth/script.js"></script>
 </body>
 
 </html>

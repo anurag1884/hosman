@@ -1,31 +1,17 @@
+/* (C)2026 */
 package hosman.controller;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import hosman.entity.Account;
-import hosman.entity.Doctor;
-import hosman.entity.Nurse;
-import hosman.entity.Patient;
 import hosman.entity.Profile;
-import hosman.entity.Receptionist;
+import hosman.entity.roles.Doctor;
+import hosman.entity.roles.Nurse;
+import hosman.entity.roles.Patient;
+import hosman.entity.roles.Receptionist;
 import hosman.enums.Role;
 import hosman.repo.AccountRepository;
-import hosman.request.LoginRequest;
-import hosman.request.PrivilegedRegisterRequest;
-import hosman.request.RegisterRequest;
+import hosman.request.auth.LoginRequest;
+import hosman.request.auth.PrivilegedRegisterRequest;
+import hosman.request.auth.RegisterRequest;
 import hosman.response.ValidationResponse;
 import hosman.service.AccountService;
 import hosman.service.DoctorService;
@@ -33,6 +19,19 @@ import hosman.service.NurseService;
 import hosman.service.PatientService;
 import hosman.service.ProfileService;
 import hosman.service.ReceptionistService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AuthController {
@@ -49,9 +48,16 @@ public class AuthController {
     private final ReceptionistService recepService;
     private final PatientService patService;
 
-    public AuthController(AuthenticationManager manager, AccountRepository repo, SecurityContextRepository securityRepo,
-            AccountService accService, DoctorService docService, NurseService nurseService,
-            ReceptionistService recepService, PatientService patService, ProfileService profileService) {
+    public AuthController(
+            AuthenticationManager manager,
+            AccountRepository repo,
+            SecurityContextRepository securityRepo,
+            AccountService accService,
+            DoctorService docService,
+            NurseService nurseService,
+            ReceptionistService recepService,
+            PatientService patService,
+            ProfileService profileService) {
 
         this.manager = manager;
 
@@ -64,7 +70,6 @@ public class AuthController {
         this.nurseService = nurseService;
         this.recepService = recepService;
         this.patService = patService;
-
     }
 
     //
@@ -72,103 +77,89 @@ public class AuthController {
     //
 
     @PostMapping("/login")
-    public ValidationResponse login(@RequestBody LoginRequest req, HttpServletRequest httpRequest,
+    public ValidationResponse login(
+            @RequestBody LoginRequest req,
+            HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
 
-        String username = req.username().trim();
-
-        if (!accService.getAccount(username).isPresent())
-            return new ValidationResponse(false, "Username '" + username + "' does not exist.");
-
-        Authentication auth;
-
         try {
+            String username = req.username().trim();
 
-            auth = manager.authenticate(new UsernamePasswordAuthenticationToken(username, req.password()));
+            if (!accService.accountExists(username))
+                return new ValidationResponse(false, "Username '" + username + "' does not exist.");
 
-        } catch (AuthenticationException e) {
-            return new ValidationResponse(false, "Password is invalid. Try again.");
+            Authentication auth;
+            try {
+                auth =
+                        manager.authenticate(
+                                new UsernamePasswordAuthenticationToken(username, req.password()));
+            } catch (AuthenticationException e) {
+                return new ValidationResponse(false, "Password is invalid. Try again.");
+            }
+
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(auth);
+
+            SecurityContextHolder.setContext(context);
+            securityRepo.saveContext(context, httpRequest, httpResponse);
+        } catch (NullPointerException e) {
+            return new ValidationResponse(false, "Malformed request sent.");
         }
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-
-        SecurityContextHolder.setContext(context);
-        securityRepo.saveContext(context, httpRequest, httpResponse);
-
         return new ValidationResponse(true, "SUCCESS");
-
     }
 
     @PostMapping("/register")
     public ValidationResponse register(@RequestBody RegisterRequest req) {
-        String username = req.username().trim();
 
-        if (!ProfileController.checkUsername(username))
-            return new ValidationResponse(false, "Username '" + username + "' is invalid.");
-
-        if (accService.getAccount(username).isPresent())
-            return new ValidationResponse(false, "Username '" + username + "' is already taken.");
-
-        String password = req.password();
-
-        if (password.length() < 8)
-            return new ValidationResponse(false, "Password is too short.");
-
-        Account acc = accService.saveAccount(username, password, Role.PATIENT);
-
-        patService.savePatient(new Patient(acc));
-
-        Profile profile = new Profile(acc);
-
-        profileService.saveProfile(profile);
-
-        return new ValidationResponse(true, "SUCCESS");
-
+        return privilegedRegister(new PrivilegedRegisterRequest(req, Role.PATIENT));
     }
 
     @PostMapping("/admin/register")
-    public ValidationResponse privilegedRegister(@Valid @RequestBody PrivilegedRegisterRequest req) {
+    public ValidationResponse privilegedRegister(
+            @Valid @RequestBody PrivilegedRegisterRequest req) {
 
-        String username = req.details().username().trim();
+        try {
+            RegisterRequest regRequest = req.credentials();
 
-        if (!username.matches("[a-zA-Z][a-zA-Z0-9]*"))
-            return new ValidationResponse(false, "Username '" + username + "' is invalid.");
+            String username = regRequest.username().trim();
+            if (!AccountService.checkUsername(username))
+                return new ValidationResponse(false, "Username '" + username + "' is invalid.");
+            if (accService.accountExists(username))
+                return new ValidationResponse(
+                        false, "Username '" + username + "' is already taken.");
 
-        if (!accService.getAccount(username).isEmpty())
-            return new ValidationResponse(false, "Username '" + username + "' is already taken.");
+            String password = regRequest.password();
+            if (password.length() < 8)
+                return new ValidationResponse(false, "Password is too short.");
 
-        String password = req.details().password();
+            Account acc = accService.createAccount(username, password, req.role());
 
-        if (password.length() < 8)
-            return new ValidationResponse(false, "Password is too short.");
-
-        Role role = req.role();
-
-        if (role == null)
-            return new ValidationResponse(false, "Role '" + role + "' is invalid.");
-
-        Account acc = accService.saveAccount(username, password, req.role());
-
-        switch (role) {
-            case DOCTOR ->
-                docService.saveDoctor(new Doctor(acc));
-            case NURSE ->
-                nurseService.saveNurse(new Nurse(acc));
-            case RECEPTIONIST ->
-                recepService.saveReceptionist(new Receptionist(acc));
-            case PATIENT ->
-                patService.savePatient(new Patient(acc));
-            default -> {
+            Profile profile = new Profile(acc);
+            try {
+                profile.updateProfile(regRequest.details());
+            } catch (IllegalArgumentException e) {
+                return new ValidationResponse(false, e.getMessage());
             }
+
+            accService.saveAccount(acc);
+            profileService.saveProfile(profile);
+
+            Role role = req.role();
+            if (role == null)
+                return new ValidationResponse(false, "Role '" + role + "' is invalid.");
+
+            switch (role) {
+                case DOCTOR -> docService.saveDoctor(new Doctor(acc));
+                case NURSE -> nurseService.saveNurse(new Nurse(acc));
+                case RECEPTIONIST -> recepService.saveReceptionist(new Receptionist(acc));
+                case PATIENT -> patService.savePatient(new Patient(acc));
+                default -> {}
+            }
+        } catch (NullPointerException e) {
+            return new ValidationResponse(false, "Malformed request sent.");
         }
 
-        Profile profile = new Profile(acc);
-
-        profileService.saveProfile(profile);
-
         return new ValidationResponse(true, "SUCCESS");
-
     }
-
 }

@@ -1,15 +1,15 @@
+/* (C)2026 */
 package hosman.entity;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import hosman.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-
-import hosman.enums.Role;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "accounts")
@@ -30,21 +30,17 @@ public class Account {
     public Role role;
 
     // No-argument constructor required by JPA
-    protected Account() {
-    }
+    protected Account() {}
 
     public Account(String username, String hashedPassword, Role role) {
 
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.role = role;
-
     }
 
     public Long getId() {
 
         return id;
-
     }
-
 }

@@ -1,10 +1,10 @@
+/* (C)2026 */
 package hosman.service;
 
-import org.springframework.stereotype.Service;
-
 import hosman.entity.Account;
-import hosman.entity.Receptionist;
+import hosman.entity.roles.Receptionist;
 import hosman.repo.ReceptionistRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ReceptionistService {
@@ -14,25 +14,20 @@ public class ReceptionistService {
     public ReceptionistService(ReceptionistRepository recepRepo) {
 
         this.recepRepo = recepRepo;
-
     }
 
     public Receptionist getReceptionist(Account acc) {
 
         return recepRepo.findByAccountId(acc.getId()).get();
-
     }
 
     public Receptionist saveReceptionist(Receptionist receptionist) {
 
         return recepRepo.save(receptionist);
-
     }
 
     public void deleteReceptionist(Receptionist receptionist) {
 
         recepRepo.delete(receptionist);
-
     }
-
 }

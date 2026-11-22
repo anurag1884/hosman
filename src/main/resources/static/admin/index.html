@@ -4,546 +4,1226 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedCore HMS — Hospital Management Dashboard</title>
-  <link rel="stylesheet" type="text/css" href="admin/style.css" />
+  <title>HOSMAN — Dashboard</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+  <!-- Free Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="admin/style.css">
 </head>
 
 <body>
-
-  <!-- ========================================================================
-       LEFT NAVIGATION PANE
-       ======================================================================== -->
-  <aside class="sidebar-navigation" aria-label="Main Navigation">
-    <div class="brand-header">
-      <div class="brand-logo-badge">+</div>
-      <span>MedCore HMS</span>
+  <!-- =======================================================================
+       TOP NAVIGATION BAR
+       ======================================================================= -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="mobileMenuBtn" class="menu-toggle-btn" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="brand-badge">
+        <i class="fa-solid fa-hospital"></i>
+        <!-- [BACKEND HOOK] Bind dynamic hospital name from settings API -->
+        <span id="topbarHospitalName"></span>
+      </div>
     </div>
 
-    <ul class="nav-menu-list">
-      <li>
-        <button class="nav-menu-button active" data-target-view="dashboard-view">
-          <span>Dashboard</span>
-        </button>
-      </li>
-      <li>
-        <button class="nav-menu-button" data-target-view="accounts-view">
-          <span>Accounts</span>
-        </button>
-      </li>
-      <li>
-        <button class="nav-menu-button" data-target-view="appointments-view">
-          <span>Appointments</span>
-        </button>
-      </li>
-      <li>
-        <button class="nav-menu-button" data-target-view="opd-queue-view">
-          <span>OPD Queue</span>
-        </button>
-      </li>
-      <li>
-        <button class="nav-menu-button" data-target-view="billing-view">
-          <span>Billing</span>
-        </button>
-      </li>
-      <li>
-        <button class="nav-menu-button" data-target-view="reports-view">
-          <span>Report</span>
-        </button>
-      </li>
-    </ul>
-  </aside>
+    <div class="topbar-right">
+      <!-- Notification Bell with Red Unread Dot -->
+      <button id="bellBtn" class="bell-btn" title="Notifications" aria-label="Open Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span id="bellRedDot" class="bell-dot active" title="Unread notifications"></span>
+      </button>
 
-  <!-- ========================================================================
-       MAIN WORKSPACE
-       ======================================================================== -->
-  <div class="main-workspace">
+      <!-- Top-Right Logged-in User Profile Trigger -->
+      <button id="profileTrigger" class="profile-trigger" aria-expanded="false" aria-label="User Profile Menu">
+        <img id="topbarAvatar" class="profile-avatar"
+          src="https://ui-avatars.com/api/?name=Admin+User&background=0f766e&color=ffffff" alt="User Avatar" />
+        <span class="profile-meta">
+          <span id="topbarUsername" class="profile-username">dr.admin</span>
+          <span id="topbarRole" class="profile-role">ADMIN</span>
+        </span>
+        <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem;"></i>
+      </button>
 
-    <!-- TOP HEADER WITH PROFILE SETTINGS & LOGOUT -->
-    <header class="top-navbar">
-      <h1 class="page-Header-title" id="current-page-title">Hosman Dashboard</h1>
-
-      <div class="profile-menu-container">
-        <button class="profile-trigger-button" id="profile-menu-trigger" aria-expanded="false">
-          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=120&q=80"
-            alt="Profile Photo" class="profile-avatar" />
-          <div class="profile-user-info">
-            <span class="profile-username" id="header-username-display"></span>
-            <span class="profile-role-badge">Administrator</span>
-          </div>
+      <!-- Profile Dropdown Menu -->
+      <div id="profileDropdown" class="profile-dropdown" role="menu">
+        <button id="openMyProfileBtn" class="dropdown-item" role="menuitem">
+          <i class="fa-solid fa-user-gear"></i>
+          <span>Profile Settings</span>
         </button>
-
-        <div class="profile-dropdown-menu" id="profile-dropdown">
-          <button class="dropdown-action-item" id="open-profile-settings-btn">
-            Account Profile Settings
-          </button>
-          <button class="dropdown-action-item logout-button" id="logout-system-btn">
-            Log Out of HMS
-          </button>
-        </div>
+        <button id="openChangePasswordBtn" class="dropdown-item" role="menuitem">
+          <i class="fa-solid fa-key"></i>
+          <span>Change Password</span>
+        </button>
+        <button id="dropdownLogoutBtn" class="dropdown-item danger" role="menuitem">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="viewport-content">
+  <div class="app-body">
+    <!-- =====================================================================
+         LEFT NAVIGATION PANE
+         ===================================================================== -->
+    <aside id="sidebar" class="sidebar">
+      <ul class="nav-list" id="navList">
+        <li>
+          <button class="nav-btn active" data-section="dashboard">
+            <i class="fa-solid fa-gauge-high"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="users">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>Manage Users</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="departments">
+            <i class="fa-solid fa-building-user"></i>
+            <span>Manage Departments</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="pharmacy">
+            <i class="fa-solid fa-pills"></i>
+            <span>Pharmacy</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="beds">
+            <i class="fa-solid fa-bed-pulse"></i>
+            <span>Bed Management</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="bloodbank">
+            <i class="fa-solid fa-droplet"></i>
+            <span>Blood Bank</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="billing">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Billing</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="analytics">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Analytics</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notifications</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="settings">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Settings</span>
+          </button>
+        </li>
+      </ul>
 
-      <!-- ====================================================================
-           1. DASHBOARD VIEW (Role Counts)
-           ==================================================================== -->
-      <section id="dashboard-view" class="view-section active-view">
-        <div class="section-Split-header">
+      <div class="sidebar-footer">
+        <button id="sidebarLogoutBtn" class="logout-nav-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- =====================================================================
+         MAIN WORKSPACE
+         ===================================================================== -->
+    <main class="main-content">
+      <!-- 1. DASHBOARD OVERVIEW -->
+      <section id="sec-dashboard" class="section-view active">
+        <div class="page-header">
           <div>
-            <h2>Staff &amp; Patient Directory Statistics</h2>
-            <p class="section-subtitle">Live headcount breakdown across hospital roles</p>
+            <!-- [BACKEND HOOK] Replace greeting name with authenticated session user -->
+            <h1 id="welcomeGreeting" class="page-title">Welcome back, Administrator!</h1>
+            <p id="currentDateDisplay" class="page-subtitle"></p>
           </div>
         </div>
 
-        <div class="stats-card-grid" id="dashboard-role-stats-grid">
-          <!-- Populated dynamically via JS -->
-        </div>
+        <!-- [BACKEND HOOK] Fetch real-time KPI counts from /api/admin/dashboard-stats -->
+        <div id="dashboardStatsGrid" class="stats-grid"></div>
       </section>
 
-      <!-- ====================================================================
-           2. ACCOUNTS VIEW (Sortable Table + Inline Add Admin + Filter Panel)
-           ==================================================================== -->
-      <section id="accounts-view" class="view-section">
-        <div class="section-Split-header">
+      <!-- 2. MANAGE USERS -->
+      <section id="sec-users" class="section-view">
+        <div class="page-header">
           <div>
-            <h2>View Accounts</h2>
-            <p class="section-subtitle">Manage hospital personnel and registered patients</p>
+            <h1 class="page-title">Manage Users</h1>
+            <p class="page-subtitle">Search and manage user accounts.</p>
           </div>
-          <button class="btn btn-primary" id="toggle-add-account-section-btn">
-            + Add New Account
+          <button id="openCreateUserBtn" class="btn btn-primary">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Create New User</span>
           </button>
         </div>
 
-        <!-- Inline New Admin Registration Section (Non-Floating) -->
-        <div class="inline-creation-section" id="add-account-inline-section">
-          <div class="inline-section-header">
-            <h3>Register New Account</h3>
-            <button class="btn btn-secondary btn-sm" id="close-add-account-section-btn">Close Section</button>
-          </div>
-          <form id="create-admin-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="new-admin-username">Username</label>
-                <input type="text" id="new-admin-username" class="form-control" placeholder="e.g., admin.priya.sharma"
-                  required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="new-admin-email">Email</label>
-                <input type="email" id="new-admin-email" class="form-control" placeholder="priya.sharma@medcore.org"
-                  required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="new-admin-role">Role</label>
-                <select id="user-role-filter" class="form-control">
-                  <option selected disabled value="">(Select Role)</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Doctor">Doctor</option>
-                  <option value="Nurse">Nurse</option>
-                  <option value="Receptionist">Receptionist</option>
-                  <option value="Patient">Patient</option>
-                </select>
-              </div>
+        <div class="card">
+          <div class="filter-bar">
+            <div class="form-group" style="flex: 2; min-width: 210px;">
+              <label class="form-label" for="userSearchInput">Search by Username or Name</label>
+              <input id="userSearchInput" type="text" class="input" placeholder="Type username or name..." />
             </div>
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Create Account</button>
+            <div class="form-group" style="flex: 1; min-width: 155px;">
+              <label class="form-label" for="userRoleFilter">Filter by Role</label>
+              <select id="userRoleFilter" class="select">
+                <option value="">All Roles</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="DOCTOR">DOCTOR</option>
+                <option value="NURSE">NURSE</option>
+                <option value="PATIENT">PATIENT</option>
+                <option value="RECEPTIONIST">RECEPTIONIST</option>
+                <option value="PHARMACIST">PHARMACIST</option>
+              </select>
             </div>
-          </form>
-        </div>
-
-        <!-- Filter Panel Below Top-Right Button -->
-        <div class="filter-panel">
-          <div class="form-group">
-            <label class="form-label" for="user-search-filter">Search by Username</label>
-            <input type="text" id="user-search-filter" class="form-control" placeholder="Filter username..." />
+            <div class="form-group" style="flex: 1; min-width: 170px;">
+              <label class="form-label" for="userDepartmentFilter">Filter by Department</label>
+              <select id="userDepartmentFilter" class="select">
+                <option value="">All Departments</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 155px;">
+              <label class="form-label" for="userAvailabilityFilter">Filter by Availability</label>
+              <select id="userAvailabilityFilter" class="select">
+                <option value="">All Availability</option>
+                <option value="available">Available</option>
+                <option value="unavailable">Unavailable</option>
+                <option value="na">N/A</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 145px;">
+              <label class="form-label" for="userStatusFilter">Filter by Status</label>
+              <select id="userStatusFilter" class="select">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button id="resetUserFiltersBtn" class="btn btn-outline">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="user-role-filter">Filter by Role</label>
-            <select id="user-role-filter" class="form-control">
-              <option value="ALL">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Nurse">Nurse</option>
-              <option value="Receptionist">Receptionist</option>
-              <option value="Patient">Patient</option>
-            </select>
-          </div>
-        </div>
 
-        <!-- Users Table -->
-        <div class="table-card-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="sortable-column col-expanded" data-table="users" data-column="username">
-                  Username <span class="sort-indicator">↕</span>
-                </th>
-                <th class="sortable-column" data-table="users" data-column="role">
-                  Role <span class="sort-indicator">↕</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table id="usersTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="username" data-sort-type="text">
+                    Username <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="role" data-sort-type="text">
+                    Role <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="fullName" data-sort-type="text">
+                    Full Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="email" data-sort-type="text">
+                    Email <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="departmentDisplay" data-sort-type="text">
+                    Department <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="availabilityDisplay" data-sort-type="text">
+                    Availability <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="qualificationDisplay" data-sort-type="text">
+                    Qualification <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="specializationDisplay" data-sort-type="text">
+                    Specialization <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="experienceSortVal" data-sort-type="number">
+                    Years of Experience <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="workingTimeDisplay" data-sort-type="text">
+                    Working Time <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="statusLabel" data-sort-type="text">
+                    Status <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- ====================================================================
-           3. APPOINTMENTS VIEW (Sortable + Inline Booking + Filter Panel)
-           ==================================================================== -->
-      <section id="appointments-view" class="view-section">
-        <div class="section-Split-header">
+      <!-- 3. MANAGE DEPARTMENTS -->
+      <section id="sec-departments" class="section-view">
+        <div class="page-header">
           <div>
-            <h2>Patient Appointments</h2>
-            <p class="section-subtitle">Schedule, filter, and manage outpatient consultations</p>
+            <h1 class="page-title">Manage Departments</h1>
+            <p class="page-subtitle">Configure hospital departments and assign Head Doctors.</p>
           </div>
-          <button class="btn btn-primary" id="toggle-book-appointment-btn">
-            + Book New Appointment
+          <button id="openAddDeptBtn" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Department</span>
           </button>
         </div>
 
-        <!-- Inline Book Appointment Section (Non-Floating) -->
-        <div class="inline-creation-section" id="book-appointment-inline-section">
-          <div class="inline-section-header">
-            <h3>Book New Patient Appointment</h3>
-            <button class="btn btn-secondary btn-sm" id="close-book-appointment-btn">Close Section</button>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="departmentsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="name" data-sort-type="text">
+                    Department Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="headDoctorLabel" data-sort-type="text">
+                    Head Doctor <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="description" data-sort-type="text">
+                    Description <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="departmentsTableBody"></tbody>
+            </table>
           </div>
-          <form id="book-appointment-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="appointment-time-input">Appointment Time</label>
-                <input type="time" id="appointment-time-input" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="appointment-patient-input">Patient Full Name</label>
-                <input type="text" id="appointment-patient-input" class="form-control" placeholder="e.g., Rohan Verma"
-                  required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="appointment-doctor-input">Assigned Doctor</label>
-                <input type="text" id="appointment-doctor-input" class="form-control"
-                  placeholder="e.g., Dr. Kavita Nair" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="appointment-department-input">Department</label>
-                <select id="appointment-department-input" class="form-control" required>
-                  <option value="Cardiology">Cardiology</option>
-                  <option value="Orthopedics">Orthopedics</option>
-                  <option value="Neurology">Neurology</option>
-                  <option value="General Medicine">General Medicine</option>
-                  <option value="Pediatrics">Pediatrics</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="appointment-status-input">Initial Status</label>
-                <select id="appointment-status-input" class="form-control" required>
-                  <option value="Waiting">Waiting</option>
-                  <option value="Confirmed">Confirmed</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Confirm Booking</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Filter Panel Below Button -->
-        <div class="filter-panel">
-          <div class="form-group">
-            <label class="form-label" for="appointment-search-filter">Patient or Doctor Name</label>
-            <input type="text" id="appointment-search-filter" class="form-control"
-              placeholder="Search patient or doctor..." />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="appointment-department-filter">Department</label>
-            <select id="appointment-department-filter" class="form-control">
-              <option value="ALL">All Departments</option>
-              <option value="Cardiology">Cardiology</option>
-              <option value="Orthopedics">Orthopedics</option>
-              <option value="Neurology">Neurology</option>
-              <option value="General Medicine">General Medicine</option>
-              <option value="Pediatrics">Pediatrics</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="appointment-status-filter">Appointment Status</label>
-            <select id="appointment-status-filter" class="form-control">
-              <option value="ALL">All Statuses</option>
-              <option value="Waiting">Waiting</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Appointments Table -->
-        <div class="table-card-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="sortable-column" data-table="appointments" data-column="time">Time <span
-                    class="sort-indicator">↕</span></th>
-                <th class="sortable-column" data-table="appointments" data-column="patientName">Patient <span
-                    class="sort-indicator">↕</span></th>
-                <th class="sortable-column" data-table="appointments" data-column="doctorName">Doctor <span
-                    class="sort-indicator">↕</span></th>
-                <th class="sortable-column" data-table="appointments" data-column="department">Department <span
-                    class="sort-indicator">↕</span></th>
-                <th class="sortable-column" data-table="appointments" data-column="status">Status <span
-                    class="sort-indicator">↕</span></th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="appointments-table-body"></tbody>
-          </table>
         </div>
       </section>
 
-      <!-- ====================================================================
-           4. OPD QUEUE VIEW (Sorted by Timings & Status)
-           ==================================================================== -->
-      <section id="opd-queue-view" class="view-section">
-        <div class="section-Split-header">
+      <!-- 4. PHARMACY -->
+      <section id="sec-pharmacy" class="section-view">
+        <div class="page-header">
           <div>
-            <h2>Live Outpatient Department (OPD) Queue</h2>
-            <p class="section-subtitle">Synchronized token queue ordered by appointment timing and consultation status
+            <h1 class="page-title">Pharmacy Inventory</h1>
+            <p class="page-subtitle">Track medications, batches, stock status, expiry dates and prescription rules.</p>
+          </div>
+          <button id="openAddMedBtn" class="btn btn-primary">
+            <i class="fa-solid fa-capsules"></i>
+            <span>Add Medication</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table id="pharmacyTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="displayName" data-sort-type="text">
+                    Name (Name &amp; Generic) <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="category" data-sort-type="text">
+                    Category <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="batchNumber" data-sort-type="text">
+                    Batch # <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="price" data-sort-type="number">
+                    Price <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="quantity" data-sort-type="number">
+                    Quantity <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="status" data-sort-type="text">
+                    Status <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="expiryDate" data-sort-type="text">
+                    Expiry Date <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pharmacyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. BED MANAGEMENT -->
+      <section id="sec-beds" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Bed Management</h1>
+            <p class="page-subtitle">Click an available bed to assign a patient, an occupied bed to discharge/release,
+              or manage wards and beds.</p>
+          </div>
+          <button id="openAddWardBtn" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Ward</span>
+          </button>
+        </div>
+
+        <div id="bedStatsGrid" class="stats-grid"></div>
+        <div id="wardsContainer"></div>
+      </section>
+
+      <!-- 6. BLOOD BANK -->
+      <section id="sec-bloodbank" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Blood Bank</h1>
+            <p class="page-subtitle">Click any blood group card to add or issue units or record a new donor entry.</p>
+          </div>
+          <button id="openRecordDonationBtn" class="btn btn-primary">
+            <i class="fa-solid fa-hand-holding-droplet"></i>
+            <span>Record New Donation</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Blood Group Inventory (Units)</h2>
+          </div>
+          <div id="bloodCardsGrid" class="blood-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Donations Log</h2>
+          </div>
+          <div class="table-wrap">
+            <table id="donationsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="donorName" data-sort-type="text">
+                    Donor Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="bloodGroup" data-sort-type="text">
+                    Blood Group <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="units" data-sort-type="number">
+                    Units <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="phone" data-sort-type="text">
+                    Phone <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="email" data-sort-type="text">
+                    Email <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="notes" data-sort-type="text">
+                    Notes <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="donationsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. BILLING -->
+      <section id="sec-billing" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Billing &amp; Invoices</h1>
+            <p class="page-subtitle">Monitor patient invoices, payment balances and export billing records to CSV.</p>
+          </div>
+          <button id="exportBillingCsvBtn" class="btn btn-primary">
+            <i class="fa-solid fa-file-csv"></i>
+            <span>Export to CSV</span>
+          </button>
+        </div>
+
+        <div id="billingStatsGrid" class="stats-grid"></div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table id="billingTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="invoiceNo" data-sort-type="text">
+                    Invoice # <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="patientName" data-sort-type="text">
+                    Patient Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="date" data-sort-type="text">
+                    Date <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="totalAmount" data-sort-type="number">
+                    Total Amount <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="amountPaid" data-sort-type="number">
+                    Amount Paid <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="amountDue" data-sort-type="number">
+                    Amount Due <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="status" data-sort-type="text">
+                    Status <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="billingTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. ANALYTICS -->
+      <section id="sec-analytics" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Hospital Analytics</h1>
+            <p class="page-subtitle">All-time revenue, monthly registrations, appointment statuses and department load.
             </p>
           </div>
         </div>
 
-        <div class="filter-panel">
-          <div class="form-group">
-            <label class="form-label" for="opd-status-priority-filter">Filter Queue by Status</label>
-            <select id="opd-status-priority-filter" class="form-control">
-              <option value="ALL">All Statuses (Waiting, Confirmed, Cancelled)</option>
-              <option value="Waiting">Waiting Only</option>
-              <option value="Confirmed">Confirmed Only</option>
-              <option value="Cancelled">Cancelled Only</option>
-            </select>
-          </div>
-        </div>
+        <div id="analyticsStatsGrid" class="stats-grid"></div>
 
-        <div class="table-card-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="sortable-column" data-table="opd" data-column="time">Scheduled Time <span
-                    class="sort-indicator">↕</span></th>
-                <th>Patient Name</th>
-                <th>Consulting Doctor</th>
-                <th>Department</th>
-                <th class="sortable-column" data-table="opd" data-column="status">Queue Status <span
-                    class="sort-indicator">↕</span></th>
-              </tr>
-            </thead>
-            <tbody id="opd-queue-table-body"></tbody>
-          </table>
+        <div class="charts-grid">
+          <div class="card chart-box">
+            <div class="card-header">
+              <h2 class="card-title">Monthly Revenue vs. Appointments</h2>
+            </div>
+            <!-- [BACKEND HOOK] Supply yearly monthly arrays from /api/admin/analytics/revenue-appointments -->
+            <div class="chart-canvas-wrap">
+              <canvas id="revApptChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-box">
+            <div class="card-header">
+              <h2 class="card-title">Appointment Status Breakdown</h2>
+            </div>
+            <!-- [BACKEND HOOK] Supply status counts from /api/admin/analytics/appointment-status -->
+            <div class="chart-canvas-wrap">
+              <canvas id="apptStatusPieChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-box" style="grid-column: 1 / -1;">
+            <div class="card-header">
+              <h2 class="card-title">Department Statistics (Patients per Department)</h2>
+            </div>
+            <!-- [BACKEND HOOK] Supply patient counts per department from /api/admin/analytics/departments -->
+            <div class="chart-canvas-wrap tall">
+              <canvas id="deptPatientsBarChart"></canvas>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- ====================================================================
-           5. BILLING VIEW (Table + Inline Create Bill + Filter Panel)
-           ==================================================================== -->
-      <section id="billing-view" class="view-section">
-        <div class="section-Split-header">
+      <!-- 9. NOTIFICATIONS -->
+      <section id="sec-notifications" class="section-view">
+        <div class="page-header">
           <div>
-            <h2>Patient Billing &amp; Invoices</h2>
-            <p class="section-subtitle">Track post-consultation charges, collect payments, and print receipts</p>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle">Administrative logs for created/deleted/updated users and key system events.</p>
           </div>
-          <button class="btn btn-primary" id="toggle-create-bill-btn">
-            + Create New Bill
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button id="markAllReadBtn" class="btn btn-outline">
+              <i class="fa-solid fa-check-double"></i> Mark All Read
+            </button>
+            <button id="clearNotificationsBtn" class="btn btn-danger">
+              <i class="fa-solid fa-trash"></i> Clear All
+            </button>
+          </div>
         </div>
 
-        <!-- Inline Create Bill Section (Non-Floating) -->
-        <div class="inline-creation-section" id="create-bill-inline-section">
-          <div class="inline-section-header">
-            <h3>Generate New Patient Invoice</h3>
-            <button class="btn btn-secondary btn-sm" id="close-create-bill-btn">Close Section</button>
+        <div class="card">
+          <div class="notif-toolbar">
+            <div class="notif-filter-group" role="group" aria-label="Filter notifications">
+              <button type="button" class="btn btn-sm btn-outline active-filter" data-notif-filter="all">All</button>
+              <button type="button" class="btn btn-sm btn-outline" data-notif-filter="read">Read</button>
+              <button type="button" class="btn btn-sm btn-outline" data-notif-filter="unread">Unread</button>
+            </div>
           </div>
-          <form id="create-bill-form">
+          <div id="notificationsList"></div>
+        </div>
+      </section>
+
+      <!-- 10. SETTINGS -->
+      <section id="sec-settings" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-subtitle">Manage hospital identity, contact info and notification preferences.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="settingsForm">
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label" for="bill-patient-name-input">Patient Name</label>
-                <input type="text" id="bill-patient-name-input" class="form-control"
-                  placeholder="e.g., Ananya Chatterjee" required />
+                <label class="form-label req" for="setHospitalName">Hospital Name</label>
+                <input id="setHospitalName" type="text" class="input" required />
               </div>
               <div class="form-group">
-                <label class="form-label" for="bill-service-name-input">Service Name</label>
-                <select id="bill-service-name-input" class="form-control" required>
-                  <option value="Consultation">Consultation</option>
-                  <option value="Physical Therapy">Physical Therapy</option>
-                  <option value="Diagnostic Lab Panel">Diagnostic Lab Panel</option>
-                  <option value="MRI / Radiology Scan">MRI / Radiology Scan</option>
-                  <option value="Minor Procedure">Minor Procedure</option>
-                </select>
+                <label class="form-label req" for="setContactEmail">Contact Email</label>
+                <input id="setContactEmail" type="email" class="input" required />
               </div>
               <div class="form-group">
-                <label class="form-label" for="bill-amount-input">Payment Amount ($)</label>
-                <input type="number" id="bill-amount-input" class="form-control" min="1" step="0.01"
-                  placeholder="150.00" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="bill-date-input">Billing Date</label>
-                <input type="date" id="bill-date-input" class="form-control" required />
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Issue Bill</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Billing Filter Panel -->
-        <div class="filter-panel">
-          <div class="form-group">
-            <label class="form-label" for="bill-patient-search-filter">Search Patient</label>
-            <input type="text" id="bill-patient-search-filter" class="form-control" placeholder="Patient name..." />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="bill-service-filter">Service Type</label>
-            <select id="bill-service-filter" class="form-control">
-              <option value="ALL">All Services</option>
-              <option value="Consultation">Consultation</option>
-              <option value="Physical Therapy">Physical Therapy</option>
-              <option value="Diagnostic Lab Panel">Diagnostic Lab Panel</option>
-              <option value="MRI / Radiology Scan">MRI / Radiology Scan</option>
-              <option value="Minor Procedure">Minor Procedure</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="bill-payment-status-filter">Payment Status</label>
-            <select id="bill-payment-status-filter" class="form-control">
-              <option value="ALL">All Bills</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Billing Table -->
-        <div class="table-card-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Patient Name</th>
-                <th>Service Name</th>
-                <th>Payment Amount</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="billing-table-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           6. REPORT VIEW (Daily Inflow, Outflow, & Revenue Metrics)
-           ==================================================================== -->
-      <section id="reports-view" class="view-section">
-        <div class="section-Split-header">
-          <div>
-            <h2>Daily Hospital Inflow &amp; Outflow Report</h2>
-            <p class="section-subtitle">Real-time operational throughput and financial summary for today</p>
-          </div>
-        </div>
-
-        <div class="stats-card-grid" id="report-metrics-grid">
-          <!-- Populated dynamically via JS -->
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           7. PROFILE SETTINGS VIEW (Inline Section for Updating Account Details)
-           ==================================================================== -->
-      <section id="profile-settings-view" class="view-section">
-        <div class="section-Split-header">
-          <div>
-            <h2>Update Profile</h2>
-            <p class="section-subtitle">Update personal and contact details</p>
-          </div>
-        </div>
-
-        <div class="table-card-container" style="padding: 28px;">
-          <form id="profile-settings-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="profile-first-name">First Name</label>
-                <input type="text" id="profile-first-name" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-middle-name">Middle Name</label>
-                <input type="text" id="profile-middle-name" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-last-name">Last Name</label>
-                <input type="text" id="profile-last-name" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-gender">Gender</label>
-                <select id="profile-gender" class="form-control">
-                  <option value="" selected>(Select Gender)</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-dob">Date of Birth</label>
-                <input type="date" id="profile-dob" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-email">Email Address</label>
-                <input type="email" id="profile-email" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="profile-phone-number">Phone Number</label>
-                <input type="tel" id="profile-phone-number" class="form-control" />
+                <label class="form-label req" for="setPhoneNumber">Phone Number</label>
+                <input id="setPhoneNumber" type="tel" class="input" required />
               </div>
               <div class="form-group full-width">
-                <label class="form-label" for="profile-address">Residential Address</label>
-                <textarea id="profile-address" class="form-control" rows="3"></textarea>
+                <label class="form-label req" for="setAddress">Address</label>
+                <textarea id="setAddress" rows="2" class="textarea" required></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label class="checkbox-row">
+                  <input id="setNotificationsEnabled" type="checkbox" />
+                  <span>Enable System &amp; Administrative Notifications</span>
+                </label>
               </div>
             </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Update Profile Details</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="section-Split-header" style="margin-top: 18px">
-          <h2>Change Username</h2>
-        </div>
-
-        <div class="table-card-container" style="padding: 28px">
-          <form id="profile-new-username-form">
-            <div class="form-group">
-              <label class="form-label" for="profile-new-username">Username</label>
-              <input type="text" id="profile-new-username" class="form-control" />
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Change Username</button>
+            <div style="margin-top: 16px;">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Save Settings
+              </button>
             </div>
           </form>
         </div>
       </section>
-
     </main>
   </div>
 
-  <!-- Toast Notification Element -->
-  <div id="toast-notification" class="notification-banner" role="status" aria-live="polite"></div>
+  <!-- =======================================================================
+       FULL-VIEWPORT FLOATING DIALOGS (MODALS)
+       ======================================================================= -->
 
-  <!-- ========================================================================
-       APPLICATION LOGIC (Readable, Modular, State-Driven JavaScript)
-       ======================================================================== -->
-  <script type="text/javascript" src="admin/script.js"></script>
+  <!-- Modal 1: User Profile Editor (Logged-in User OR Selected Table User) -->
+  <div id="userProfileModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="userProfileModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="userProfileModalTitle" class="modal-title">Edit User Profile</h2>
+        <button type="button" class="modal-close" data-close-modal="userProfileModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="userProfileForm" class="modal-form">
+        <div class="modal-body">
+          <input type="hidden" id="profUserId" />
+          <div class="profile-sections">
+            <!-- Section A: Account & Role -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <i class="fa-solid fa-id-badge"></i>
+                <span>Account &amp; Role</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="profUsername">Username</label>
+                  <input id="profUsername" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="profRole">Role</label>
+                  <select id="profRole" class="select" required>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="DOCTOR">DOCTOR</option>
+                    <option value="NURSE">NURSE</option>
+                    <option value="PATIENT">PATIENT</option>
+                    <option value="RECEPTIONIST">RECEPTIONIST</option>
+                    <option value="PHARMACIST">PHARMACIST</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section B: Personal Information -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <i class="fa-solid fa-user"></i>
+                <span>Personal Information</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="profFirstName">First Name</label>
+                  <input id="profFirstName" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profMiddleName">Middle Name</label>
+                  <input id="profMiddleName" type="text" class="input" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="profLastName">Last Name</label>
+                  <input id="profLastName" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="profGender">Gender</label>
+                  <select id="profGender" class="select" required>
+                    <option value="" disabled>Select Gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="profDob">Date of Birth</label>
+                  <input id="profDob" type="date" class="input" required />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section C: Role-Specific & Clinical Details -->
+            <div id="profRoleDetailsSection" class="profile-section" style="display: none;">
+              <div class="profile-section-title">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span>Role &amp; Clinical Details</span>
+              </div>
+              <div class="form-grid">
+                <!-- Patient-specific Field: Blood Group -->
+                <div id="profBloodGroupWrap" class="form-group" style="display: none;">
+                  <label class="form-label req" for="profBloodGroup">Blood Group</label>
+                  <select id="profBloodGroup" class="select">
+                    <option value="" disabled>Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                  </select>
+                </div>
+
+                <!-- Doctor / Nurse Field: Department -->
+                <div id="profDepartmentWrap" class="form-group" style="display: none;">
+                  <label class="form-label req" for="profDepartment">Department</label>
+                  <select id="profDepartment" class="select"></select>
+                </div>
+
+                <!-- Doctor / Nurse / Pharmacist Field: Qualification -->
+                <div id="profQualificationWrap" class="form-group" style="display: none;">
+                  <label class="form-label req" for="profQualification">Qualification</label>
+                  <input id="profQualification" type="text" class="input" placeholder="e.g., MBBS, MD / B.Pharm" />
+                </div>
+
+                <!-- Doctor / Nurse Field: Specialization -->
+                <div id="profSpecializationWrap" class="form-group" style="display: none;">
+                  <label class="form-label req" for="profSpecialization">Specialization</label>
+                  <input id="profSpecialization" type="text" class="input" placeholder="e.g., Interventional Cardiology" />
+                </div>
+
+                <!-- Doctor / Nurse / Pharmacist / Receptionist Field: Years of Experience -->
+                <div id="profExperienceWrap" class="form-group" style="display: none;">
+                  <label class="form-label req" for="profExperience">Years of Experience</label>
+                  <input id="profExperience" type="number" min="0" max="70" step="1" class="input" placeholder="e.g., 5" />
+                </div>
+
+                <!-- Doctor / Nurse / Pharmacist / Receptionist Field: Working Time Range -->
+                <div id="profWorkingTimeWrap" class="form-group" style="display: none;">
+                  <label class="form-label req">Working Time Range</label>
+                  <div class="work-range-grid">
+                    <div>
+                      <label class="form-label" for="profWorkStart" style="font-weight: 500; color: var(--text-muted);">Start</label>
+                      <input id="profWorkStart" type="time" class="input" />
+                    </div>
+                    <div>
+                      <label class="form-label" for="profWorkEnd" style="font-weight: 500; color: var(--text-muted);">End</label>
+                      <input id="profWorkEnd" type="time" class="input" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Doctor / Nurse / Pharmacist / Receptionist Field: Is Available -->
+                <div id="profAvailabilityWrap" class="form-group" style="display: none; justify-content: center;">
+                  <label class="form-label" for="profIsAvailable">Availability Status</label>
+                  <label class="checkbox-row">
+                    <input id="profIsAvailable" type="checkbox" />
+                    <span>Is Available</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section D: Contact & Address -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <i class="fa-solid fa-address-book"></i>
+                <span>Contact &amp; Address</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="profEmail">E-mail Address</label>
+                  <input id="profEmail" type="email" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="profPhone">Phone Number</label>
+                  <input id="profPhone" type="tel" class="input" required />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label req" for="profAddress">Residential Address</label>
+                  <textarea id="profAddress" rows="2" class="textarea" required></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="userProfileModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> Save Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Create New User -->
+  <div id="createUserModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Create New User</h2>
+        <button type="button" class="modal-close" data-close-modal="createUserModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="createUserForm" class="modal-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label req" for="newUsername">Username</label>
+              <input id="newUsername" type="text" class="input" required placeholder="e.g., dr.sharma" />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="newDummyPassword">Dummy Password</label>
+              <div class="password-input-wrap">
+                <input id="newDummyPassword" type="password" class="input" required
+                  placeholder="Initial temp password" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="newDummyPassword"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="newUserRole">Role</label>
+              <select id="newUserRole" class="select" required>
+                <option value="ADMIN">ADMIN</option>
+                <option value="DOCTOR">DOCTOR</option>
+                <option value="NURSE">NURSE</option>
+                <option value="PATIENT">PATIENT</option>
+                <option value="RECEPTIONIST">RECEPTIONIST</option>
+                <option value="PHARMACIST">PHARMACIST</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="createUserModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add / Edit Department -->
+  <div id="departmentModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="departmentModalTitle" class="modal-title">Add Department</h2>
+        <button type="button" class="modal-close" data-close-modal="departmentModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="departmentForm" class="modal-form">
+        <div class="modal-body">
+          <input type="hidden" id="deptId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label req" for="deptName">Department Name</label>
+              <input id="deptName" type="text" class="input" required placeholder="e.g., Cardiology" />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="deptHeadDoctor">Head Doctor</label>
+              <select id="deptHeadDoctor" class="select" required></select>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="deptDescription">Description (Optional)</label>
+              <textarea id="deptDescription" rows="2" class="textarea" placeholder="Department overview..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="departmentModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Department</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add / Edit Medication -->
+  <div id="medicationModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="medicationModalTitle" class="modal-title">Add Medication</h2>
+        <button type="button" class="modal-close" data-close-modal="medicationModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="medicationForm" class="modal-form">
+        <div class="modal-body">
+          <input type="hidden" id="medId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label req" for="medName">Name</label>
+              <input id="medName" type="text" class="input" required placeholder="e.g., Augmentin 625" />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medGenericName">Generic Name</label>
+              <input id="medGenericName" type="text" class="input" required
+                placeholder="e.g., Amoxicillin + Clavulanate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medCategory">Category</label>
+              <input id="medCategory" type="text" class="input" required placeholder="e.g., Antibiotic" />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medManufacturer">Manufacturer</label>
+              <input id="medManufacturer" type="text" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medBatchNumber">Batch Number</label>
+              <input id="medBatchNumber" type="text" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medPrice">Price (₹)</label>
+              <input id="medPrice" type="number" step="0.01" min="0" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medQuantity">Quantity</label>
+              <input id="medQuantity" type="number" min="0" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medReorderLevel">Reorder Level</label>
+              <input id="medReorderLevel" type="number" min="0" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="medExpiryDate">Expiry Date</label>
+              <input id="medExpiryDate" type="date" class="input" required />
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="medDescription">Description</label>
+              <textarea id="medDescription" rows="2" class="textarea"></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="medSideEffects">Side Effects</label>
+              <textarea id="medSideEffects" rows="2" class="textarea"></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label class="checkbox-row">
+                <input id="medPrescriptionOnly" type="checkbox" />
+                <span>Must only be bought via prescription</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="medicationModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Medication</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Bed Assign / Release -->
+  <div id="bedActionModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 id="bedActionTitle" class="modal-title">Bed Action</h2>
+        <button type="button" class="modal-close" data-close-modal="bedActionModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="bedActionBody" class="modal-body"></div>
+      <div id="bedActionFooter" class="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- Modal 5B: Add Ward / Add Bed to Ward -->
+  <div id="addBedModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="addBedModalTitle" class="modal-title">Add Ward</h2>
+        <button type="button" class="modal-close" data-close-modal="addBedModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="addBedForm" class="modal-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div id="wardSelectGroup" class="form-group full-width">
+              <label class="form-label req" for="newBedWardSelect">Ward</label>
+              <select id="newBedWardSelect" class="select" required></select>
+            </div>
+            <div id="customWardGroup" class="form-group full-width" style="display: none;">
+              <label class="form-label req" for="newBedCustomWard">New Ward Name</label>
+              <input id="newBedCustomWard" type="text" class="input" placeholder="e.g., Maternity" />
+            </div>
+            <div id="bedDetailsRowGroup" class="form-group full-width">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="newBedNumber">Bed Number</label>
+                  <div class="input-prefix-group">
+                    <span id="newBedPrefixBadge" class="input-prefix-addon">BED-</span>
+                    <input id="newBedNumber" type="number" min="1" step="1" class="input" placeholder="101" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="newBedPrice">Price per Day (₹)</label>
+                  <input id="newBedPrice" type="number" min="1" step="1" class="input" placeholder="e.g., 250" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="addBedModal">Cancel</button>
+          <button type="submit" id="addBedSubmitBtn" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Save Ward
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Add / Issue Blood Units -->
+  <div id="bloodAdjustModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2 id="bloodAdjustTitle" class="modal-title">Adjust Blood Units</h2>
+        <button type="button" class="modal-close" data-close-modal="bloodAdjustModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="bloodAdjustForm" class="modal-form">
+        <div class="modal-body">
+          <input type="hidden" id="adjustBloodGroup" />
+          <p id="bloodCurrentUnitsText" style="margin-bottom: 12px; font-weight: 600;"></p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label req" for="bloodActionMode">Action</label>
+              <select id="bloodActionMode" class="select" required>
+                <option value="add">Add Units (+)</option>
+                <option value="issue">Issue Units (-)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="bloodUnitsDelta">Units</label>
+              <input id="bloodUnitsDelta" type="number" min="1" value="1" class="input" required />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="bloodAdjustModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 7: Record New Blood Donation -->
+  <div id="donationModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Record New Blood Donation</h2>
+        <button type="button" class="modal-close" data-close-modal="donationModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="donationForm" class="modal-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label req" for="donorName">Donor Name</label>
+              <input id="donorName" type="text" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="donorBloodGroup">Blood Group</label>
+              <select id="donorBloodGroup" class="select" required>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="donorUnits">Number of Units</label>
+              <input id="donorUnits" type="number" min="1" value="1" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="donorPhone">Phone Number</label>
+              <input id="donorPhone" type="tel" class="input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="donorEmail">Email</label>
+              <input id="donorEmail" type="email" class="input" required />
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="donorNotes">Optional Notes</label>
+              <textarea id="donorNotes" rows="2" class="textarea"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="donationModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Donation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 8: View Invoice Details -->
+  <div id="invoiceModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="invoiceModalTitle" class="modal-title">Invoice Details</h2>
+        <button type="button" class="modal-close" data-close-modal="invoiceModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="invoiceModalBody" class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal="invoiceModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Change Password -->
+  <div id="changePasswordModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="changePasswordModalTitle">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2 id="changePasswordModalTitle" class="modal-title">Change Password</h2>
+        <button type="button" class="modal-close" data-close-modal="changePasswordModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="changePasswordForm" class="modal-form">
+        <div class="modal-body">
+          <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div class="form-group">
+              <label class="form-label req" for="currentPasswordInput">Current Password</label>
+              <div class="password-input-wrap">
+                <input id="currentPasswordInput" type="password" class="input" required autocomplete="current-password"
+                  placeholder="Enter current password" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="currentPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="newPasswordInput">New Password</label>
+              <div class="password-input-wrap">
+                <input id="newPasswordInput" type="password" class="input" required minlength="6"
+                  autocomplete="new-password" placeholder="Enter new password (min 6 chars)" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="newPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="repeatNewPasswordInput">Repeat New Password</label>
+              <div class="password-input-wrap">
+                <input id="repeatNewPasswordInput" type="password" class="input" required minlength="6"
+                  autocomplete="new-password" placeholder="Re-enter new password" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="repeatNewPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="changePasswordModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-key"></i> Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 10: User Activation / Deactivation Confirmation Prompt Modal -->
+  <div id="userStatusModal" class="modal-backdrop confirm-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="userStatusModalTitle">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header" id="userStatusModalHeader">
+        <h2 id="userStatusModalTitle" class="modal-title">Confirm User Status Change</h2>
+        <button type="button" class="modal-close" data-close-modal="userStatusModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-dialog-content">
+          <div id="userStatusModalIcon" class="confirm-dialog-icon success">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+          <div style="flex: 1;">
+            <p id="userStatusModalMessage" class="confirm-dialog-message"></p>
+            <p id="userStatusModalSubtext" class="confirm-dialog-subtext"></p>
+            <div id="userStatusSummaryCard" class="status-summary-card"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="userStatusModal">Cancel</button>
+        <button type="button" id="userStatusConfirmBtn" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 11: Universal Confirmation Dialog (Deletions & Logout) -->
+  <div id="confirmDialogModal" class="modal-backdrop confirm-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="confirmDialogTitle">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header confirm-header" id="confirmDialogHeader">
+        <h2 id="confirmDialogTitle" class="modal-title">Confirm Action</h2>
+        <button type="button" class="modal-close" data-close-modal="confirmDialogModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-dialog-content">
+          <div id="confirmDialogIcon" class="confirm-dialog-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <p id="confirmDialogMessage" class="confirm-dialog-message"></p>
+            <p id="confirmDialogSubtext" class="confirm-dialog-subtext"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="confirmDialogCancelBtn" class="btn btn-outline"
+          data-close-modal="confirmDialogModal">Cancel</button>
+        <button type="button" id="confirmDialogProceedBtn" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="admin/script.js"></script>
 </body>
 
 </html>
