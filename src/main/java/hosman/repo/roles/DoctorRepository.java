@@ -8,6 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     Optional<Doctor> findByAccountId(Long id);
-
-    // Optional<Doctor> findByAccountUsername(String username);
 }

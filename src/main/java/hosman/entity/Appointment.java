@@ -7,6 +7,8 @@ import hosman.entity.roles.Patient;
 import hosman.enums.AppointmentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +37,7 @@ public class Appointment {
     public LocalDateTime appointmentTime;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     public AppointmentStatus status;
 
     // No-argument constructor required by JPA

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  
+
   <link rel="stylesheet" href="auth/style.css">
 </head>
 
@@ -120,8 +120,8 @@
         <div class="field field--third">
           <label for="gender">Gender <span class="required" aria-hidden="true">*</span></label>
           <div class="custom-select" data-options="Male,Female,Other">
-            <input type="text" id="gender" name="gender" class="custom-select__input"
-              placeholder="Select or type..." autocomplete="off" required>
+            <input type="text" id="gender" name="gender" class="custom-select__input" placeholder="Select gender"
+              autocomplete="off" required>
             <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle gender options">
               <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m6 9 6 6 6-6" />
@@ -135,7 +135,7 @@
           <label for="bloodGroup">Blood group <span class="required" aria-hidden="true">*</span></label>
           <div class="custom-select" data-options="A+,A-,B+,B-,AB+,AB-,O+,O-">
             <input type="text" id="bloodGroup" name="bloodGroup" class="custom-select__input"
-              placeholder="Select or type (e.g. O+)..." autocomplete="off" required>
+              placeholder="Select blood group" autocomplete="off" required>
             <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle blood group options">
               <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m6 9 6 6 6-6" />
@@ -155,8 +155,7 @@
 
         <div class="field field--half">
           <label for="phone">Phone number <span class="required" aria-hidden="true">*</span></label>
-          <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="Enter valid phone number..."
-            required>
+          <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="Phone number" required>
         </div>
 
         <div class="field field--full">
@@ -182,10 +181,10 @@
           </div>
 
           <div class="field field--third">
-            <label for="emergencyRelation">Relation</label>
+            <label for="emergencyRelation">Emergency contact relation</label>
             <div class="custom-select" data-options="Spouse,Parent,Guardian,Sibling,Child,Friend,Other">
               <input type="text" id="emergencyRelation" name="emergencyContactRelation" class="custom-select__input"
-                placeholder="Select or type relation..." autocomplete="off">
+                placeholder="Select relation" autocomplete="off">
               <button type="button" class="custom-select__toggle" tabindex="-1" aria-label="Toggle relation options">
                 <svg class="custom-select__chevron" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m6 9 6 6 6-6" />
@@ -213,14 +212,14 @@
         <div class="field field--third">
           <label for="regUsername">Username <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="regUsername" name="username" autocomplete="username" minlength="4"
-            placeholder="Min. 4 characters" required>
+            placeholder="Username" required>
         </div>
 
         <div class="field field--third">
           <label for="regPassword">Password <span class="required" aria-hidden="true">*</span></label>
           <div class="password-field">
             <input type="password" id="regPassword" name="password" autocomplete="new-password" minlength="8"
-              placeholder="Min. 8 characters" required>
+              placeholder="Password" required>
             <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
               <svg class="icon icon-eye" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
@@ -275,7 +274,7 @@
 
   </main>
 
-  <script src="auth/script.js"></script>
+  <script type="module" src="auth/script.js"></script>
 </body>
 
 </html>

@@ -1,22 +1,16 @@
 /* (C)2026 */
 package hosman.entity.roles;
 
+import hosman.dto.request.edit.EditProfileRequest;
 import hosman.entity.Account;
 import hosman.entity.Profile;
-import hosman.request.profile.EditProfileRequest;
-import jakarta.persistence.CascadeType;
+import hosman.except.FieldException;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "doctors")
 public class Doctor extends Profile {
-
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "account_id", nullable = false, unique = true)
-    private Account account;
 
     public String department;
 
@@ -27,7 +21,7 @@ public class Doctor extends Profile {
     public Integer yearsOfExperience;
 
     // @Column(nullable = false)
-    // public boolean isAvailable;
+    public boolean isAvailable;
 
     // No-argument constructor required by JPA
     protected Doctor() {}
@@ -38,7 +32,8 @@ public class Doctor extends Profile {
     }
 
     @Override
-    public void updateProfile(EditProfileRequest req) throws IllegalArgumentException {
+    public void updateProfile(EditProfileRequest req) throws FieldException {
+
         super.updateProfile(req);
 
         department = req.department();
@@ -48,15 +43,5 @@ public class Doctor extends Profile {
         specialization = req.specialization();
 
         yearsOfExperience = req.yearsOfExperience();
-    }
-
-    public Long getId() {
-
-        return id;
-    }
-
-    public Account getAccount() {
-
-        return account;
     }
 }

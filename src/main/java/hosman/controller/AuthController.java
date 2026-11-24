@@ -1,19 +1,27 @@
 /* (C)2026 */
 package hosman.controller;
 
+import hosman.common.CheckValidation;
+import hosman.dto.request.auth.LoginRequest;
+import hosman.dto.request.auth.RegisterRequest;
+import hosman.dto.request.edit.EditUserDetailsRequest;
+import hosman.dto.response.UserDetailsResponse;
 import hosman.entity.Account;
+import hosman.entity.roles.Admin;
 import hosman.entity.roles.Doctor;
 import hosman.entity.roles.Nurse;
 import hosman.entity.roles.Patient;
 import hosman.entity.roles.Pharmacist;
 import hosman.entity.roles.Receptionist;
+import hosman.enums.EnumParser;
 import hosman.enums.Role;
-import hosman.repo.AccountRepository;
-import hosman.request.auth.LoginRequest;
-import hosman.request.auth.PrivilegedRegisterRequest;
-import hosman.request.auth.RegisterRequest;
-import hosman.response.ValidationResponse;
+import hosman.except.ConflictException;
+import hosman.except.FieldException;
+import hosman.except.NotFoundException;
+import hosman.except.UnauthorizedException;
 import hosman.service.AccountService;
+import hosman.service.SecurityService;
+import hosman.service.roles.AdminService;
 import hosman.service.roles.DoctorService;
 import hosman.service.roles.NurseService;
 import hosman.service.roles.PatientService;
@@ -22,26 +30,21 @@ import hosman.service.roles.ReceptionistService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AuthController {
 
-    private final AuthenticationManager manager;
-
-    private final SecurityContextRepository securityRepo;
-
     private final AccountService accService;
+    private final SecurityService secService;
 
+    private final AdminService adminService;
     private final DoctorService docService;
     private final NurseService nurseService;
     private final ReceptionistService recepService;
@@ -49,22 +52,19 @@ public class AuthController {
     private final PatientService patService;
 
     public AuthController(
-            AuthenticationManager manager,
-            AccountRepository repo,
-            SecurityContextRepository securityRepo,
             AccountService accService,
+            SecurityService secService,
+            AdminService adminService,
             DoctorService docService,
             NurseService nurseService,
             ReceptionistService recepService,
             PharmacistService pharmaService,
             PatientService patService) {
 
-        this.manager = manager;
-
-        this.securityRepo = securityRepo;
-
         this.accService = accService;
+        this.secService = secService;
 
+        this.adminService = adminService;
         this.docService = docService;
         this.nurseService = nurseService;
         this.recepService = recepService;
@@ -77,105 +77,121 @@ public class AuthController {
     //
 
     @PostMapping("/login")
-    public ValidationResponse login(
-            @RequestBody LoginRequest req,
+    public void login(
+            @Valid @RequestBody LoginRequest req,
             HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
+            HttpServletResponse httpResponse)
+            throws NotFoundException, UnauthorizedException {
 
-        try {
-            String username = req.username().trim();
+        String username = req.username();
+        Account acc = accService.get(username);
 
-            if (!accService.accountExists(username))
-                return new ValidationResponse(false, "Username '" + username + "' does not exist.");
+        String password = req.password();
+        accService.verifyPassword(acc, password);
 
-            Authentication auth;
-            try {
-                auth =
-                        manager.authenticate(
-                                new UsernamePasswordAuthenticationToken(username, req.password()));
-            } catch (AuthenticationException e) {
-                return new ValidationResponse(false, "Password is invalid. Try again.");
-            }
-
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(auth);
-
-            SecurityContextHolder.setContext(context);
-            securityRepo.saveContext(context, httpRequest, httpResponse);
-        } catch (NullPointerException e) {
-            return new ValidationResponse(false, "Malformed request sent.");
-        }
-
-        return new ValidationResponse(true, "SUCCESS");
+        secService.save(username, password, httpRequest, httpResponse);
     }
 
     @PostMapping("/register")
-    public ValidationResponse register(@RequestBody RegisterRequest req) {
+    public void register(@Valid @RequestBody RegisterRequest req)
+            throws FieldException, ConflictException {
 
-        return privilegedRegister(new PrivilegedRegisterRequest(req, Role.PATIENT));
+        privilegedRegister(
+                new RegisterRequest(
+                        req.username(), req.password(), "PATIENT", req.details(), true));
     }
 
     @PostMapping("/admin/register")
-    public ValidationResponse privilegedRegister(
-            @Valid @RequestBody PrivilegedRegisterRequest req) {
+    public void privilegedRegister(@Valid @RequestBody RegisterRequest req)
+            throws FieldException, ConflictException {
 
-        try {
-            RegisterRequest regReq = req.credentials();
+        String username = req.username();
+        CheckValidation.checkUsername(username);
+        if (accService.exists(username))
+            throw new ConflictException("Username '" + username + "' is already taken.");
 
-            String username = regReq.username().trim();
-            if (!AccountService.checkUsername(username))
-                return new ValidationResponse(false, "Username '" + username + "' is invalid.");
-            if (accService.accountExists(username))
-                return new ValidationResponse(
-                        false, "Username '" + username + "' is already taken.");
+        String password = req.password();
+        if (req.passwordCheck()) CheckValidation.checkPassword(password);
 
-            String password = regReq.password();
-            if (password.length() < 8)
-                return new ValidationResponse(false, "Password is too short.");
+        String roleString = req.role();
+        if (roleString == null) throw new FieldException("Must specify a role.");
 
-            Account acc = accService.createAccount(username, password, req.role());
-
-            Role role = req.role();
-            if (role == null)
-                return new ValidationResponse(false, "Role '" + role + "' is invalid.");
-
-            try {
-                switch (role) {
-                    case DOCTOR -> {
-                        Doctor doc = new Doctor(acc);
-                        doc.updateProfile(regReq.details());
-                        docService.saveDoctor(doc);
-                    }
-                    case NURSE -> {
-                        Nurse nurse = new Nurse(acc);
-                        nurse.updateProfile(regReq.details());
-                        nurseService.saveNurse(nurse);
-                    }
-                    case RECEPTIONIST -> {
-                        Receptionist recep = new Receptionist(acc);
-                        recep.updateProfile(regReq.details());
-                        recepService.saveReceptionist(recep);
-                    }
-                    case PHARMACIST -> {
-                        Pharmacist pharma = new Pharmacist(acc);
-                        pharma.updateProfile(regReq.details());
-                        pharmaService.savePharmacist(pharma);
-                    }
-                    case PATIENT -> {
-                        Patient pat = new Patient(acc);
-                        pat.updateProfile(regReq.details());
-                        patService.savePatient(pat);
-                    }
-                    default -> {}
-                }
-            } catch (IllegalArgumentException e) {
-                return new ValidationResponse(false, e.getMessage());
+        Account acc =
+                accService.create(
+                        username, password, EnumParser.parseEnum(Role.class, roleString, "Role"));
+        switch (acc.role) {
+            case ADMIN -> {
+                Admin admin = new Admin(acc);
+                admin.updateProfile(req.details());
+                adminService.save(admin);
             }
-
-        } catch (NullPointerException e) {
-            return new ValidationResponse(false, "Malformed request sent.");
+            case DOCTOR -> {
+                Doctor doc = new Doctor(acc);
+                doc.updateProfile(req.details());
+                docService.save(doc);
+            }
+            case NURSE -> {
+                Nurse nurse = new Nurse(acc);
+                nurse.updateProfile(req.details());
+                nurseService.save(nurse);
+            }
+            case RECEPTIONIST -> {
+                Receptionist recep = new Receptionist(acc);
+                recep.updateProfile(req.details());
+                recepService.save(recep);
+            }
+            case PHARMACIST -> {
+                Pharmacist pharma = new Pharmacist(acc);
+                pharma.updateProfile(req.details());
+                pharmaService.save(pharma);
+            }
+            case PATIENT -> {
+                Patient pat = new Patient(acc);
+                pat.updateProfile(req.details());
+                patService.save(pat);
+            }
         }
+    }
 
-        return new ValidationResponse(true, "SUCCESS");
+    @GetMapping("/user")
+    public UserDetailsResponse getUser(@AuthenticationPrincipal UserDetails userDetails)
+            throws NotFoundException {
+
+        String username = userDetails.getUsername();
+        Account acc = accService.get(username);
+        return new UserDetailsResponse(acc.getId(), acc.username);
+    }
+
+    @PutMapping("/user")
+    public void editUser(
+            @Valid @RequestBody EditUserDetailsRequest req,
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse)
+            throws NotFoundException, FieldException, UnauthorizedException, ConflictException {
+
+        String username = userDetails.getUsername();
+        Account acc = accService.get(username);
+
+        String password = req.oldPassword();
+        if (password == null)
+            throw new UnauthorizedException("Current password is required for authentication.");
+
+        accService.verifyPassword(acc, password);
+
+        String newUsername = req.newUsername();
+        String newPassword = req.newPassword();
+
+        if (newUsername == null && newPassword == null) return;
+
+        if (newUsername == null) newUsername = username;
+        else CheckValidation.checkUsername(newUsername);
+
+        if (newPassword == null) newPassword = password;
+        else if (req.passwordCheck()) CheckValidation.checkPassword(newPassword);
+
+        accService.updateCredentials(acc, newUsername, newPassword);
+
+        secService.save(newUsername, newPassword, httpRequest, httpResponse);
     }
 }

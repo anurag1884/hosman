@@ -1,21 +1,20 @@
+/* (C)2026 */
 package hosman.entity.supply;
 
 import hosman.enums.BloodGroup;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity 
-@Table (name = "bloodbanks")
+@Entity
+@Table(name = "bloodbanks")
 public class BloodBank {
-    
-    @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
+    @Id
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     public BloodGroup bloodGroup;
 
@@ -26,13 +25,8 @@ public class BloodBank {
     protected BloodBank() {}
 
     public BloodBank(BloodGroup bloodGroup, Long units) {
-        
+
         this.bloodGroup = bloodGroup;
         this.units = units;
-    }
-
-    public Long getId() {
-
-        return id;
     }
 }

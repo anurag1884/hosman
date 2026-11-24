@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HOSMAN — Doctor Portal</title>
+
+  <!-- Free Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="doctor/style.css">
+</head>
+
+<body>
+  <!-- =======================================================================
+       TOP NAVIGATION BAR
+       ======================================================================= -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="mobileMenuBtn" class="menu-toggle-btn" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="brand-badge">
+        <i class="fa-solid fa-hospital"></i>
+        <span id="topbarHospitalName">MediCore General Hospital</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Notification Bell with Red Unread Dot -->
+      <button id="bellBtn" class="bell-btn" title="Notifications" aria-label="Open Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span id="bellRedDot" class="bell-dot active" title="Unread notifications"></span>
+      </button>
+
+      <!-- Top-Right Logged-in Doctor Profile Trigger -->
+      <button id="profileTrigger" class="profile-trigger" aria-expanded="false" aria-label="Doctor Profile Menu">
+        <img id="topbarAvatar" class="profile-avatar"
+          src="https://ui-avatars.com/api/?name=Dr.+Mei+Chen&background=0f766e&color=ffffff" alt="Doctor Avatar" />
+        <span class="profile-meta">
+          <span id="topbarUsername" class="profile-username">dr.chen</span>
+          <span id="topbarRole" class="profile-role">DOCTOR</span>
+        </span>
+        <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem;"></i>
+      </button>
+
+      <!-- Profile Dropdown Menu -->
+      <div id="profileDropdown" class="profile-dropdown" role="menu">
+        <button id="openMyProfileBtn" class="dropdown-item" role="menuitem">
+          <i class="fa-solid fa-user-doctor"></i>
+          <span>Profile Settings</span>
+        </button>
+        <button id="openChangePasswordBtn" class="dropdown-item" role="menuitem">
+          <i class="fa-solid fa-key"></i>
+          <span>Change Password</span>
+        </button>
+        <button id="dropdownLogoutBtn" class="dropdown-item danger" role="menuitem">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- =====================================================================
+         LEFT NAVIGATION PANE
+         ===================================================================== -->
+    <aside id="sidebar" class="sidebar">
+      <ul class="nav-list" id="navList">
+        <li>
+          <button class="nav-btn active" data-section="dashboard">
+            <i class="fa-solid fa-gauge-high"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="opdqueue">
+            <i class="fa-solid fa-list-ol"></i>
+            <span>OPD Queue</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="appointments">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>My Appointments</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="patients">
+            <i class="fa-solid fa-hospital-user"></i>
+            <span>My Patients</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-section="notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notifications</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button id="sidebarLogoutBtn" class="logout-nav-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- =====================================================================
+         MAIN WORKSPACE
+         ===================================================================== -->
+    <main class="main-content">
+      <!-- 1. DOCTOR DASHBOARD OVERVIEW -->
+      <section id="sec-dashboard" class="section-view active">
+        <div class="page-header">
+          <div>
+            <h1 id="welcomeGreeting" class="page-title">Welcome back, Dr. Mei Chen!</h1>
+            <p id="currentDateDisplay" class="page-subtitle"></p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span id="doctorDeptBadge" class="badge badge-teal" style="padding: 6px 12px; font-size: 0.82rem;">
+              <i class="fa-solid fa-stethoscope"></i> Cardiology
+            </span>
+          </div>
+        </div>
+
+        <!-- KPI Stats Grid -->
+        <div id="dashboardStatsGrid" class="stats-grid"></div>
+
+        <!-- OPD Queue Table Embedded on Dashboard -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Today's Live OPD Queue</h2>
+              <p class="page-subtitle">Ordered strictly by clinical priority: Confirmed &rarr; Pending &rarr; Completed
+                &rarr; Cancelled.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="openFullOpdQueueBtn">
+              <span>Open Full OPD Queue</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table id="dashboardOpdTable">
+              <thead>
+                <tr>
+                  <th>Queue #</th>
+                  <th>Patient Name</th>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Chief Complaint</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardOpdTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. DEDICATED OPD QUEUE SECTION -->
+      <section id="sec-opdqueue" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">OPD Queue</h1>
+            <p class="page-subtitle">Real-time outpatient queue ordered by status (Confirmed &rarr; Pending &rarr;
+              Completed &rarr; Cancelled) and scheduled slot.</p>
+          </div>
+        </div>
+
+        <div id="opdQueueStatsGrid" class="stats-grid"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Outpatient Consultation Queue</h2>
+            <span class="badge badge-teal">
+              <i class="fa-solid fa-arrow-down-short-wide"></i> Priority Order: Confirmed &rarr; Pending &rarr;
+              Completed &rarr; Cancelled
+            </span>
+          </div>
+          <div class="table-wrap">
+            <table id="opdQueueTable">
+              <thead>
+                <tr>
+                  <th>Queue #</th>
+                  <th>Patient Name</th>
+                  <th>Date &amp; Time</th>
+                  <th>Type</th>
+                  <th>Chief Complaint / Reason</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="opdQueueTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MY APPOINTMENTS (SORTABLE COLUMNS EXCEPT ACTIONS) -->
+      <section id="sec-appointments" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My Appointments</h1>
+            <p class="page-subtitle">Confirm or cancel pending requests, complete consultations, and issue digital
+              prescriptions.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar">
+            <div class="form-group" style="flex: 2; min-width: 210px;">
+              <label class="form-label" for="apptSearchInput">Search Patient Name</label>
+              <input id="apptSearchInput" type="text" class="input" placeholder="Search by patient name..." />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 165px;">
+              <label class="form-label" for="apptTypeFilter">Appointment Type</label>
+              <input id="apptTypeFilter" type="text" list="apptTypeOptionsList" class="input"
+                placeholder="All Types (type or pick)..." autocomplete="off" />
+              <datalist id="apptTypeOptionsList">
+                <option value="Consultation"></option>
+                <option value="Follow-up"></option>
+              </datalist>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 165px;">
+              <label class="form-label" for="apptStatusFilter">Appointment Status</label>
+              <input id="apptStatusFilter" type="text" list="apptStatusOptionsList" class="input"
+                placeholder="All Statuses (type or pick)..." autocomplete="off" />
+              <datalist id="apptStatusOptionsList">
+                <option value="Confirmed"></option>
+                <option value="Pending"></option>
+                <option value="Completed"></option>
+                <option value="Cancelled"></option>
+              </datalist>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button id="resetApptFiltersBtn" class="btn btn-outline">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="appointmentsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="patientName" data-sort-type="text">
+                    Patient Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="dateTimeSort" data-sort-type="text">
+                    Date &amp; Time <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="type" data-sort-type="text">
+                    Type <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="reason" data-sort-type="text">
+                    Chief Complaint / Reason <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="status" data-sort-type="text">
+                    Status <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MY PATIENTS (ONLY PATIENTS WITH AT LEAST ONE COMPLETED APPOINTMENT; SORTABLE EXCEPT ACTIONS) -->
+      <section id="sec-patients" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My Patients</h1>
+            <p class="page-subtitle">Patients with at least one completed appointment under your care. Click any row to
+              view medical history and prescriptions.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar">
+            <div class="form-group" style="flex: 2; min-width: 220px;">
+              <label class="form-label" for="patientSearchInput">Search Patient</label>
+              <input id="patientSearchInput" type="text" class="input"
+                placeholder="Search by name, phone, or condition..." />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 150px;">
+              <label class="form-label" for="patientBloodFilter">Blood Group</label>
+              <input id="patientBloodFilter" type="text" list="bloodGroupOptionsList" class="input"
+                placeholder="All Blood Groups..." autocomplete="off" />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 150px;">
+              <label class="form-label" for="patientGenderFilter">Gender</label>
+              <input id="patientGenderFilter" type="text" list="genderOptionsList" class="input"
+                placeholder="All Genders..." autocomplete="off" />
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button id="resetPatientFiltersBtn" class="btn btn-outline">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="patientsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="fullName" data-sort-type="text">
+                    Patient Name <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="age" data-sort-type="number">
+                    Age <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="gender" data-sort-type="text">
+                    Gender <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="phone" data-sort-type="text">
+                    Phone Number <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="bloodGroup" data-sort-type="text">
+                    Blood Group <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="chronicCondition" data-sort-type="text">
+                    Known Allergies / Condition <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th class="sortable" data-sort-key="lastVisit" data-sort-type="text">
+                    Last Visit <i class="fa-solid sort-icon" aria-hidden="true"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. NOTIFICATIONS -->
+      <section id="sec-notifications" class="section-view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle">Clinical alerts for appointment bookings, OPD queue updates, patient updates, and
+              issued prescriptions.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button id="markAllReadBtn" class="btn btn-outline">
+              <i class="fa-solid fa-check-double"></i> Mark All Read
+            </button>
+            <button id="clearNotificationsBtn" class="btn btn-danger">
+              <i class="fa-solid fa-trash"></i> Clear All
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="notif-toolbar">
+            <div class="notif-filter-group" role="group" aria-label="Filter notifications">
+              <button type="button" class="btn btn-sm btn-outline active-filter" data-notif-filter="all">All</button>
+              <button type="button" class="btn btn-sm btn-outline" data-notif-filter="read">Read</button>
+              <button type="button" class="btn btn-sm btn-outline" data-notif-filter="unread">Unread</button>
+            </div>
+          </div>
+          <div id="notificationsList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Shared Datalists for Writable Dropdowns -->
+  <datalist id="genderOptionsList">
+    <option value="Female"></option>
+    <option value="Male"></option>
+    <option value="Other"></option>
+    <option value="Prefer not to say"></option>
+  </datalist>
+
+  <datalist id="departmentOptionsList">
+    <option value="Cardiology"></option>
+    <option value="General Medicine"></option>
+    <option value="Orthopedics"></option>
+    <option value="Neurology"></option>
+    <option value="Pediatrics"></option>
+    <option value="Emergency Medicine"></option>
+  </datalist>
+
+  <datalist id="bloodGroupOptionsList">
+    <option value="A+"></option>
+    <option value="A-"></option>
+    <option value="B+"></option>
+    <option value="B-"></option>
+    <option value="O+"></option>
+    <option value="O-"></option>
+    <option value="AB+"></option>
+    <option value="AB-"></option>
+  </datalist>
+
+  <datalist id="frequencyOptionsList">
+    <option value="Once daily (OD)"></option>
+    <option value="Twice daily (BD)"></option>
+    <option value="Three times daily (TDS)"></option>
+    <option value="Four times daily (QID)"></option>
+    <option value="At bedtime (HS)"></option>
+    <option value="As needed (SOS)"></option>
+  </datalist>
+
+  <!-- =======================================================================
+       FULL-VIEWPORT FLOATING DIALOGS (MODALS)
+       ======================================================================= -->
+
+  <!-- Modal 1: Doctor Profile Settings -->
+  <div id="doctorProfileModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="doctorProfileModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="doctorProfileModalTitle" class="modal-title">Doctor Profile Settings</h2>
+        <button type="button" class="modal-close" data-close-modal="doctorProfileModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="doctorProfileForm" class="modal-form">
+        <div class="modal-body">
+          <div class="profile-sections">
+            <!-- Section A: Account Identity -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-id-badge"></i> Account &amp; Role</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="docUsername">Username</label>
+                  <input id="docUsername" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="docRole">System Role</label>
+                  <input id="docRole" type="text" class="input" value="DOCTOR" readonly
+                    style="background: var(--bg-subtle); font-weight: 700; color: var(--teal-800);" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docLicenseNo">Medical Registration / License #</label>
+                  <input id="docLicenseNo" type="text" class="input" required placeholder="e.g., MCI-2004-88412" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section B: Personal Information -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-user"></i> Personal Information</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="docFirstName">First Name</label>
+                  <input id="docFirstName" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="docMiddleName">Middle Name</label>
+                  <input id="docMiddleName" type="text" class="input" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docLastName">Last Name</label>
+                  <input id="docLastName" type="text" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docGender">Gender</label>
+                  <input id="docGender" type="text" list="genderOptionsList" class="input" required
+                    placeholder="Type or select gender..." autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docDob">Date of Birth</label>
+                  <input id="docDob" type="date" class="input" required />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section C: Clinical & Practice Details -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-stethoscope"></i> Clinical &amp; Practice Details</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="docDepartment">Department</label>
+                  <input id="docDepartment" type="text" list="departmentOptionsList" class="input" required
+                    placeholder="Type or select department..." autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docQualification">Qualification</label>
+                  <input id="docQualification" type="text" class="input" required placeholder="e.g., MBBS, MD, DM" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docSpecialization">Specialization</label>
+                  <input id="docSpecialization" type="text" class="input" required
+                    placeholder="e.g., Interventional Cardiology" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docExperience">Years of Experience</label>
+                  <input id="docExperience" type="number" min="0" max="70" step="1" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docConsultationFee">Consultation Fee (₹)</label>
+                  <input id="docConsultationFee" type="number" min="0" step="50" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req">OPD Working Hours</label>
+                  <div class="work-range-grid">
+                    <div>
+                      <label class="form-label" for="docWorkStart"
+                        style="font-weight: 500; color: var(--text-muted);">Start</label>
+                      <input id="docWorkStart" type="time" class="input" required />
+                    </div>
+                    <div>
+                      <label class="form-label" for="docWorkEnd"
+                        style="font-weight: 500; color: var(--text-muted);">End</label>
+                      <input id="docWorkEnd" type="time" class="input" required />
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="checkbox-row">
+                    <input id="docIsAvailable" type="checkbox" />
+                    <span>Available for Patient Appointments &amp; Consultations</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section D: Contact & Clinic Address -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-address-book"></i> Contact &amp; Address</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label req" for="docEmail">E-mail Address</label>
+                  <input id="docEmail" type="email" class="input" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label req" for="docPhone">Phone Number</label>
+                  <input id="docPhone" type="tel" class="input" required />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label req" for="docAddress">Residential / Clinic Address</label>
+                  <textarea id="docAddress" rows="2" class="textarea" required></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="doctorProfileModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> Save Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add / View Digital Prescription Modal -->
+  <div id="prescriptionModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="prescriptionModalTitle">
+    <div class="modal-dialog" style="width: min(820px, 100%);">
+      <div class="modal-header">
+        <h2 id="prescriptionModalTitle" class="modal-title">Add Digital Prescription</h2>
+        <button type="button" class="modal-close" data-close-modal="prescriptionModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="prescriptionForm" class="modal-form" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="rxAppointmentId" />
+
+          <!-- Patient Clinical Context Banner -->
+          <div id="rxPatientContext" class="rx-patient-banner"></div>
+
+          <div class="profile-sections">
+            <!-- Diagnosis & Clinical Notes -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-notes-medical"></i> Clinical Diagnosis &amp; Notes</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label req" for="rxDiagnosis">Diagnosis</label>
+                  <input id="rxDiagnosis" type="text" class="input" required
+                    placeholder="e.g., Essential Hypertension (Stage 1) / Acute Viral Pharyngitis" />
+                  <div id="rxDiagnosisError" class="field-error-text">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Please enter a clinical diagnosis.</span>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label" for="rxAdditionalNotes">Additional Clinical Notes / Advice</label>
+                  <textarea id="rxAdditionalNotes" rows="2" class="textarea"
+                    placeholder="e.g., Low-sodium diet, monitor BP twice daily, follow up in 2 weeks..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prescribed Medications List -->
+            <div class="profile-section">
+              <div class="profile-section-title">
+                <span><i class="fa-solid fa-prescription-bottle-medical"></i> Prescribed Medications</span>
+                <button type="button" id="addRxMedicineRowBtn" class="btn btn-sm btn-primary"
+                  style="text-transform: none; letter-spacing: 0;">
+                  <i class="fa-solid fa-plus"></i> Add Another Medicine
+                </button>
+              </div>
+              <div id="rxMedicationsContainer"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="prescriptionModal">Cancel</button>
+          <button type="submit" id="savePrescriptionBtn" class="btn btn-primary">
+            <i class="fa-solid fa-file-prescription"></i> Issue Prescription
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Patient Clinical Profile & Prescription History -->
+  <div id="patientRecordModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="patientRecordModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="patientRecordModalTitle" class="modal-title">Patient Clinical Record</h2>
+        <button type="button" class="modal-close" data-close-modal="patientRecordModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="patientRecordModalBody" class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal="patientRecordModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Change Password -->
+  <div id="changePasswordModal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="changePasswordModalTitle">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2 id="changePasswordModalTitle" class="modal-title">Change Password</h2>
+        <button type="button" class="modal-close" data-close-modal="changePasswordModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="changePasswordForm" class="modal-form">
+        <div class="modal-body">
+          <div class="form-grid" style="grid-template-columns: 1fr;">
+            <div class="form-group">
+              <label class="form-label req" for="currentPasswordInput">Current Password</label>
+              <div class="password-input-wrap">
+                <input id="currentPasswordInput" type="password" class="input" required autocomplete="current-password"
+                  placeholder="Enter current password" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="currentPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="newPasswordInput">New Password</label>
+              <div class="password-input-wrap">
+                <input id="newPasswordInput" type="password" class="input" required minlength="6"
+                  autocomplete="new-password" placeholder="Enter new password (min 6 chars)" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="newPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label req" for="repeatNewPasswordInput">Repeat New Password</label>
+              <div class="password-input-wrap">
+                <input id="repeatNewPasswordInput" type="password" class="input" required minlength="6"
+                  autocomplete="new-password" placeholder="Re-enter new password" />
+                <button type="button" class="password-toggle-btn" data-toggle-password="repeatNewPasswordInput"
+                  aria-label="Show password" title="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="changePasswordModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-key"></i> Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Universal Confirmation Dialog (Supports Optional Cancellation Reason) -->
+  <div id="confirmDialogModal" class="modal-backdrop confirm-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="confirmDialogTitle">
+    <div class="modal-dialog" style="max-width: 470px;">
+      <div class="modal-header confirm-header" id="confirmDialogHeader">
+        <h2 id="confirmDialogTitle" class="modal-title">Confirm Action</h2>
+        <button type="button" class="modal-close" data-close-modal="confirmDialogModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-dialog-content">
+          <div id="confirmDialogIcon" class="confirm-dialog-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div style="flex: 1;">
+            <p id="confirmDialogMessage" class="confirm-dialog-message"></p>
+            <p id="confirmDialogSubtext" class="confirm-dialog-subtext"></p>
+            <div id="cancelReasonBox" class="cancel-reason-box">
+              <label class="form-label" for="cancelReasonInput">Cancellation Reason (Optional)</label>
+              <textarea id="cancelReasonInput" rows="2" class="textarea"
+                placeholder="Enter reason for cancellation (optional)..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="confirmDialogCancelBtn" class="btn btn-outline"
+          data-close-modal="confirmDialogModal">Cancel</button>
+        <button type="button" id="confirmDialogProceedBtn" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="doctor/script.js"></script>
+</body>
+
+</html>

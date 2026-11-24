@@ -16,22 +16,22 @@ public class PatientService {
         this.repo = repo;
     }
 
-    public Patient getPatient(Long id) {
+    public Patient get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Patient getPatient(Account acc) {
+    public Patient get(Account acc) {
 
-        return getPatient(acc.getId());
+        return get(acc.getId());
     }
 
-    public Patient savePatient(Patient pat) {
+    public Patient save(Patient pat) {
 
         return repo.save(pat);
     }
 
-    public void deletePatient(Patient pat) {
+    public void delete(Patient pat) {
 
         repo.delete(pat);
     }

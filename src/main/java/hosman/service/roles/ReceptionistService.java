@@ -16,22 +16,22 @@ public class ReceptionistService {
         this.repo = repo;
     }
 
-    public Receptionist getReceptionist(Long id) {
+    public Receptionist get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Receptionist getReceptionist(Account acc) {
+    public Receptionist get(Account acc) {
 
-        return getReceptionist(acc.getId());
+        return get(acc.getId());
     }
 
-    public Receptionist saveReceptionist(Receptionist recep) {
+    public Receptionist save(Receptionist recep) {
 
         return repo.save(recep);
     }
 
-    public void deleteReceptionist(Receptionist recep) {
+    public void delete(Receptionist recep) {
 
         repo.delete(recep);
     }

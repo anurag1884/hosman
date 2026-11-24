@@ -16,22 +16,22 @@ public class DoctorService {
         this.repo = repo;
     }
 
-    public Doctor getDoctor(Long id) {
+    public Doctor get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Doctor getDoctor(Account acc) {
+    public Doctor get(Account acc) {
 
-        return getDoctor(acc.getId());
+        return get(acc.getId());
     }
 
-    public Doctor saveDoctor(Doctor doc) {
+    public Doctor save(Doctor doc) {
 
         return repo.save(doc);
     }
 
-    public void deleteDoctor(Doctor doc) {
+    public void delete(Doctor doc) {
 
         repo.delete(doc);
     }

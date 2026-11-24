@@ -712,13 +712,15 @@
                 <!-- Doctor / Nurse Field: Specialization -->
                 <div id="profSpecializationWrap" class="form-group" style="display: none;">
                   <label class="form-label req" for="profSpecialization">Specialization</label>
-                  <input id="profSpecialization" type="text" class="input" placeholder="e.g., Interventional Cardiology" />
+                  <input id="profSpecialization" type="text" class="input"
+                    placeholder="e.g., Interventional Cardiology" />
                 </div>
 
                 <!-- Doctor / Nurse / Pharmacist / Receptionist Field: Years of Experience -->
                 <div id="profExperienceWrap" class="form-group" style="display: none;">
                   <label class="form-label req" for="profExperience">Years of Experience</label>
-                  <input id="profExperience" type="number" min="0" max="70" step="1" class="input" placeholder="e.g., 5" />
+                  <input id="profExperience" type="number" min="0" max="70" step="1" class="input"
+                    placeholder="e.g., 5" />
                 </div>
 
                 <!-- Doctor / Nurse / Pharmacist / Receptionist Field: Working Time Range -->
@@ -726,11 +728,13 @@
                   <label class="form-label req">Working Time Range</label>
                   <div class="work-range-grid">
                     <div>
-                      <label class="form-label" for="profWorkStart" style="font-weight: 500; color: var(--text-muted);">Start</label>
+                      <label class="form-label" for="profWorkStart"
+                        style="font-weight: 500; color: var(--text-muted);">Start</label>
                       <input id="profWorkStart" type="time" class="input" />
                     </div>
                     <div>
-                      <label class="form-label" for="profWorkEnd" style="font-weight: 500; color: var(--text-muted);">End</label>
+                      <label class="form-label" for="profWorkEnd"
+                        style="font-weight: 500; color: var(--text-muted);">End</label>
                       <input id="profWorkEnd" type="time" class="input" />
                     </div>
                   </div>
@@ -1223,7 +1227,7 @@
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <script src="admin/script.js"></script>
+  <script type="module" src="admin/script.js"></script>
 </body>
 
 </html>

@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -43,9 +45,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, SecurityContextRepository securityContextRepository) {
 
+        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        // Set to null to opt out of BREACH XOR encoding if reading raw token from
+        // cookie
+        requestHandler.setCsrfRequestAttributeName(null);
+
         http
-                // Replace the default login endpoint.
-                .csrf(csrf -> csrf.disable())
+                // Configures CSRF token repository and handler
+                .csrf(
+                        csrf ->
+                                csrf.csrfTokenRepository(tokenRepository)
+                                        .csrfTokenRequestHandler(requestHandler))
 
                 // Disables usage of Spring Security's default login page
                 .formLogin(form -> form.disable())
@@ -56,19 +67,22 @@ public class SecurityConfig {
                                         // Public frontend
                                         .requestMatchers(
                                                 "/",
-                                                "/auth/**",
+                                                "/csrf",
                                                 "/login",
                                                 "/register",
-                                                "/dashboard")
+                                                "/dashboard",
+                                                "/auth/**",
+                                                "/common/**")
                                         .permitAll()
+
+                                        // // User endpoints
+                                        // .requestMatchers("/user/**")
+                                        // .hasAnyRole("DOCTOR", "NURSE", "RECEPTIONIST",
+                                        // "PATIENT")
 
                                         // Admin-only endpoints
                                         .requestMatchers("/admin/**")
                                         .hasRole("ADMIN")
-
-                                        // // User endpoints
-                                        // .requestMatchers("/user/**")
-                                        // .hasAnyRole("DOCTOR", "NURSE", "RECEPTIONIST", "PATIENT")
 
                                         // Doctor-only endpoints
                                         .requestMatchers("/doctor/**")

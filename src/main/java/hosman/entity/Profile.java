@@ -1,12 +1,20 @@
 /* (C)2026 */
 package hosman.entity;
 
+import hosman.common.CheckValidation;
+import hosman.dto.request.edit.EditProfileRequest;
+import hosman.enums.EnumParser;
 import hosman.enums.Gender;
-import hosman.request.profile.EditProfileRequest;
+import hosman.except.FieldException;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -18,12 +26,17 @@ public abstract class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "account_id", nullable = false, unique = true)
+    protected Account account;
+
     public String firstName;
 
     public String middleName;
 
     public String lastName;
 
+    @Enumerated(EnumType.STRING)
     public Gender gender;
 
     public LocalDate dob;
@@ -37,101 +50,62 @@ public abstract class Profile {
     // No-argument constructor required by JPA
     protected Profile() {}
 
-    public void updateProfile(EditProfileRequest req) throws IllegalArgumentException {
+    public void updateProfile(EditProfileRequest req) throws FieldException {
 
         String firstName = req.firstName().trim();
-
-        if (!checkName(firstName))
-            throw new IllegalArgumentException("First name '" + firstName + "' is invalid.");
-
+        CheckValidation.checkName(firstName, "First name");
         this.firstName = firstName;
 
         String middleName = req.middleName().trim();
-
         if (middleName.isEmpty()) middleName = null;
         else {
-            if (!checkName(middleName))
-                throw new IllegalArgumentException("Middle name '" + middleName + "' is invalid.");
-
+            CheckValidation.checkName(middleName, "Middle name");
             this.middleName = middleName;
         }
 
         String lastName = req.lastName().trim();
-
-        if (!checkName(lastName))
-            throw new IllegalArgumentException("Last name '" + lastName + "' is invalid.");
-
+        CheckValidation.checkName(lastName, "Last name");
         this.lastName = lastName;
 
         String genderString = req.gender().trim();
-
-        try {
-            Gender gender = Gender.valueOf(genderString);
-            this.gender = gender;
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Gender '" + genderString + "' is invalid.");
-        }
+        Gender gender = EnumParser.parseEnum(Gender.class, genderString, "Gender");
+        this.gender = gender;
 
         String dobString = req.dob().trim();
-
         try {
             LocalDate dob = LocalDate.parse(dobString);
             LocalDate now = LocalDate.now();
-
             if (dob.isAfter(now))
-                throw new IllegalArgumentException(
+                throw new FieldException(
                         "'"
                                 + dob.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
                                 + "' is not a proper date of birth.");
-
             this.dob = dob;
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(
+            throw new FieldException(
                     "'" + dobString + "' is invalid. Please enter a valid date of birth.");
         }
 
         String email = req.email().trim();
-
-        if (!checkEmail(email))
-            throw new IllegalArgumentException(
-                    "Email '" + email + "' is invalid. Please enter a valid email.");
-
+        CheckValidation.checkEmail(email);
         this.email = email;
 
         String phone = req.phone().trim();
-
-        if (!checkPhoneNumber(phone))
-            throw new IllegalArgumentException(
-                    "Phone number '" + phone + "' is invalid. Please enter a valid phone number.");
+        CheckValidation.checkPhoneNumber(phone, "Phone number");
         this.phone = phone;
 
         String address = req.address().trim();
-
-        if (address.isEmpty()) throw new IllegalArgumentException("Please enter an address.");
+        if (address.isEmpty()) throw new FieldException("Please enter an address.");
         this.address = address;
+    }
+
+    public Account getAccount() {
+
+        return account;
     }
 
     public Long getId() {
 
         return id;
-    }
-
-    //
-    // Static methods
-    //
-
-    private static boolean checkName(String name) {
-
-        return name.matches("[a-zA-Z]+(?:[ '-][a-zA-Z]+)*");
-    }
-
-    private static boolean checkEmail(String email) {
-
-        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z]{2,}");
-    }
-
-    private static boolean checkPhoneNumber(String phoneNumber) {
-
-        return phoneNumber.matches("\\+?[0-9 ()-]{7,20}");
     }
 }

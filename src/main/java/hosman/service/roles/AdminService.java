@@ -16,22 +16,22 @@ public class AdminService {
         this.repo = repo;
     }
 
-    public Admin getAdmin(Long id) {
+    public Admin get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Admin getAdmin(Account acc) {
+    public Admin get(Account acc) {
 
-        return getAdmin(acc.getId());
+        return get(acc.getId());
     }
 
-    public Admin saveAdmin(Admin admin) {
+    public Admin save(Admin admin) {
 
         return repo.save(admin);
     }
 
-    public void deleteAdmin(Admin admin) {
+    public void delete(Admin admin) {
 
         repo.delete(admin);
     }

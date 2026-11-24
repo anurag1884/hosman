@@ -6,10 +6,15 @@ import hosman.entity.Appointment;
 import hosman.entity.roles.Doctor;
 import hosman.entity.roles.Patient;
 import hosman.enums.Role;
+import hosman.except.ConflictException;
+import hosman.except.NotFoundException;
+import hosman.except.UnauthorizedException;
 import hosman.repo.AccountRepository;
+import hosman.service.roles.AdminService;
 import hosman.service.roles.DoctorService;
 import hosman.service.roles.NurseService;
 import hosman.service.roles.PatientService;
+import hosman.service.roles.PharmacistService;
 import hosman.service.roles.ReceptionistService;
 import java.util.List;
 import org.springframework.security.core.userdetails.User;
@@ -26,9 +31,11 @@ public class AccountService implements UserDetailsService {
 
     private final AccountRepository accRepo;
 
+    private final AdminService adminService;
     private final DoctorService docService;
     private final NurseService nurseService;
     private final ReceptionistService recepService;
+    private final PharmacistService pharmaService;
     private final PatientService patService;
 
     private final AppointmentService appointService;
@@ -36,9 +43,11 @@ public class AccountService implements UserDetailsService {
     public AccountService(
             PasswordEncoder encoder,
             AccountRepository accRepo,
+            AdminService adminService,
             DoctorService docService,
             NurseService nurseService,
             ReceptionistService recepService,
+            PharmacistService pharmaService,
             PatientService patService,
             AppointmentService appointService) {
 
@@ -46,96 +55,76 @@ public class AccountService implements UserDetailsService {
 
         this.accRepo = accRepo;
 
+        this.adminService = adminService;
         this.docService = docService;
         this.nurseService = nurseService;
         this.recepService = recepService;
+        this.pharmaService = pharmaService;
         this.patService = patService;
 
         this.appointService = appointService;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
 
-        Account acc = getAccount(username);
+        try {
+            Account acc = get(username);
 
-        return User.builder()
-                .username(acc.username)
-                .password(acc.hashedPassword)
-                .roles(acc.role.name())
-                .build();
+            return User.builder()
+                    .username(acc.username)
+                    .password(acc.hashedPassword)
+                    .roles(acc.role.name())
+                    .build();
+        } catch (NotFoundException e) {
+            throw new UsernameNotFoundException(e.getMessage());
+        }
     }
 
-    public boolean accountExists(String username) {
+    public boolean exists(String username) {
 
-        return accRepo.findByUsername(username).isPresent();
+        return accRepo.existsByUsername(username);
     }
 
-    public Account getAccount(String username) throws UsernameNotFoundException {
+    public Account get(String username) throws NotFoundException {
 
         return accRepo.findByUsername(username)
                 .orElseThrow(
-                        () ->
-                                new UsernameNotFoundException(
-                                        "Account with username '"
-                                                + username
-                                                + "' does not exist."));
+                        () -> new NotFoundException("Username '" + username + "' does not exist."));
     }
 
-    public Account setNewUsername(String oldUsername, String newUsername)
-            throws UsernameNotFoundException, IllegalArgumentException {
+    public Account create(String username, String password, Role role) {
 
-        if (accountExists(newUsername))
-            throw new IllegalArgumentException("Username '" + newUsername + "' is already taken.");
-
-        Account acc = getAccount(oldUsername);
-
-        acc.username = newUsername;
-        accRepo.save(acc);
-
-        return acc;
-    }
-
-    public Account setNewPassword(Account acc, String currPassword, String newPassword) {
-
-        String hashedPassword = encoder.encode(currPassword);
-        if (acc.hashedPassword == hashedPassword) {
-            acc.hashedPassword = hashedPassword;
-            return saveAccount(acc);
-        }
-        return acc;
-    }
-
-    public Account createAccount(String username, String password, Role role) {
         return new Account(username, encoder.encode(password), role);
     }
 
-    public Account saveAccount(Account acc) {
+    public Account save(Account acc) {
 
         return accRepo.save(acc);
     }
 
-    public void deleteAccount(Account acc) {
+    public void delete(Account acc) {
 
         List<Appointment> appoints = null;
         switch (acc.role) {
+            case ADMIN -> adminService.delete(adminService.get(acc));
+
             case DOCTOR -> {
-                Doctor doc = docService.getDoctor(acc);
+                Doctor doc = docService.get(acc);
                 appoints = appointService.getAppointmentByDoctor(doc);
-                docService.deleteDoctor(doc);
+                docService.delete(doc);
             }
-            case NURSE -> {
-                nurseService.deleteNurse(nurseService.getNurse(acc));
-            }
-            case RECEPTIONIST -> {
-                recepService.deleteReceptionist(recepService.getReceptionist(acc));
-            }
+            case NURSE -> nurseService.delete(nurseService.get(acc));
+
+            case RECEPTIONIST -> recepService.delete(recepService.get(acc));
+
+            case PHARMACIST -> pharmaService.delete(pharmaService.get(acc));
+
             case PATIENT -> {
-                Patient pat = patService.getPatient(acc);
+                Patient pat = patService.get(acc);
                 appoints = appointService.getAppointmentByPatient(pat);
-                patService.deletePatient(pat);
+                patService.delete(pat);
             }
-            default -> {}
         }
         if (appoints != null)
             for (Appointment appoint : appoints) appointService.deleteAppointment(appoint);
@@ -143,12 +132,21 @@ public class AccountService implements UserDetailsService {
         accRepo.delete(acc);
     }
 
-    //
-    // Static methods
-    //
+    public Account updateCredentials(Account acc, String newUsername, String newPassword)
+            throws ConflictException {
 
-    public static boolean checkUsername(String username) {
+        if (exists(newUsername))
+            throw new ConflictException("Username '" + newUsername + "' is already taken.");
 
-        return username.matches("[a-zA-Z][a-zA-Z0-9]*");
+        acc.username = newUsername;
+        acc.hashedPassword = encoder.encode(newPassword);
+
+        return save(acc);
+    }
+
+    public void verifyPassword(Account acc, String password) throws UnauthorizedException {
+
+        if (!encoder.matches(password, acc.hashedPassword))
+            throw new UnauthorizedException("Password is invalid. Try again.");
     }
 }

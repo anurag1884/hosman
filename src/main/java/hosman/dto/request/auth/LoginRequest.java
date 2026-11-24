@@ -1,5 +1,5 @@
 /* (C)2026 */
-package hosman.request.auth;
+package hosman.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 

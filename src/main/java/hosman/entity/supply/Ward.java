@@ -1,3 +1,4 @@
+/* (C)2026 */
 package hosman.entity.supply;
 
 import jakarta.persistence.Column;
@@ -7,11 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity 
-@Table (name = "wards")
+@Entity
+@Table(name = "wards")
 public class Ward {
-    
-    @Id 
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

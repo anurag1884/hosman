@@ -1,29 +1,28 @@
 /* (C)2026 */
 package hosman.entity.roles;
 
+import hosman.common.CheckValidation;
+import hosman.dto.request.edit.EditProfileRequest;
 import hosman.entity.Account;
 import hosman.entity.Profile;
 import hosman.enums.BloodGroup;
 import hosman.enums.EmergencyContactRelation;
-import hosman.request.profile.EditProfileRequest;
-import jakarta.persistence.CascadeType;
+import hosman.enums.EnumParser;
+import hosman.except.FieldException;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "patients")
 public class Patient extends Profile {
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "account_id", nullable = false, unique = true)
-    private Account account;
-
     public BloodGroup bloodGroup;
 
     public String emergencyContactName;
 
+    @Enumerated(EnumType.STRING)
     public EmergencyContactRelation emergencyContactRelation;
 
     public String emergencyContactPhone;
@@ -39,53 +38,44 @@ public class Patient extends Profile {
     }
 
     @Override
-    public void updateProfile(EditProfileRequest req) throws IllegalArgumentException {
+    public void updateProfile(EditProfileRequest req) throws FieldException {
+
         super.updateProfile(req);
 
         String bloodGroupString = req.bloodGroup();
         if (req.bloodGroup() != null) {
             bloodGroupString = bloodGroupString.trim();
-            try {
-                BloodGroup bloodGroup = BloodGroup.valueOf(bloodGroupString);
-                this.bloodGroup = bloodGroup;
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(
-                        "Blood group '" + bloodGroupString + "' is invalid.");
-            }
+            BloodGroup bloodGroup =
+                    EnumParser.parseEnum(BloodGroup.class, bloodGroupString, "Blood group");
+            this.bloodGroup = bloodGroup;
         }
 
         String name = req.emergencyContactName();
-        if (name != null)
-            emergencyContactName = name.trim();
+        if (name != null) {
+            name = name.trim();
+            CheckValidation.checkName(name, "Emergency contact name");
+            emergencyContactName = name;
+        }
 
         String relationString = req.emergencyContactRelation();
         if (relationString != null) {
             relationString = relationString.trim();
-            try {
-                EmergencyContactRelation relation = EmergencyContactRelation.valueOf(relationString);
-                emergencyContactRelation = relation;
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(
-                        "Emergency contact relation '" + relationString + "' is invalid.");
-            }
+            EmergencyContactRelation relation =
+                    EnumParser.parseEnum(
+                            EmergencyContactRelation.class,
+                            relationString,
+                            "Emergency contact relation");
+            emergencyContactRelation = relation;
         }
 
         String phone = req.emergencyContactPhone();
-        if (phone != null)
-            emergencyContactPhone = phone.trim();
+        if (phone != null) {
+            phone = phone.trim();
+            CheckValidation.checkPhoneNumber(phone, "Emergency phone number");
+            emergencyContactPhone = phone;
+        }
 
         String all = req.allergies();
-        if (all != null)
-            allergies = all.trim();
-    }
-
-    public Long getId() {
-
-        return id;
-    }
-
-    public Account getAccount() {
-
-        return account;
+        if (all != null) allergies = all.trim();
     }
 }

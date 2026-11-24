@@ -16,22 +16,22 @@ public class PharmacistService {
         this.repo = repo;
     }
 
-    public Pharmacist getPharmacist(Long id) {
+    public Pharmacist get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Pharmacist getPharmacist(Account acc) {
+    public Pharmacist get(Account acc) {
 
-        return getPharmacist(acc.getId());
+        return get(acc.getId());
     }
 
-    public Pharmacist savePharmacist(Pharmacist pharma) {
+    public Pharmacist save(Pharmacist pharma) {
 
         return repo.save(pharma);
     }
 
-    public void deletePharmacist(Pharmacist pharma) {
+    public void delete(Pharmacist pharma) {
 
         repo.delete(pharma);
     }

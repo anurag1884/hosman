@@ -16,22 +16,22 @@ public class NurseService {
         this.repo = repo;
     }
 
-    public Nurse getNurse(Long id) {
+    public Nurse get(Long id) {
 
         return repo.findByAccountId(id).get();
     }
 
-    public Nurse getNurse(Account acc) {
+    public Nurse get(Account acc) {
 
-        return getNurse(acc.getId());
+        return get(acc.getId());
     }
 
-    public Nurse saveNurse(Nurse nurse) {
+    public Nurse save(Nurse nurse) {
 
         return repo.save(nurse);
     }
 
-    public void deleteNurse(Nurse nurse) {
+    public void delete(Nurse nurse) {
 
         repo.delete(nurse);
     }
